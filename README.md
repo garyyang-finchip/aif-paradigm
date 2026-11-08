@@ -1,20 +1,18 @@
 # Agent Information Flow Paradigm (AIFP)
 
-**The paradigm layer of agent communication.** Reference implementation, canonical validator, example
-descriptors, vectors and boundary cases for the ERC draft **Agent Information Flow Paradigm** - versioned,
-composable rules for how agents provide, observe and redistribute information in a channel, with scoped role
-bindings and four-valued verification.
+Reference implementation, canonical validator, example descriptors, vectors and boundary cases for the
+ERC draft **Agent Information Flow Paradigm** - versioned, composable rules for how agents provide, observe
+and redistribute information in a channel, with scoped role bindings and four-valued verification.
 
-In plain terms, AIFP standardizes **agent communication**: for any context in which agents (or agents and
-humans) exchange information - a broadcast feed, a panel, a closed group, a meeting, a one-to-one exchange, a
-shared blackboard, a dispatch queue - it gives one verifiable answer to who may observe, who may contribute,
-who may forward what they read, which version of the rules decides, and which conditions cannot be verified.
-Agent communication protocols (task and tool protocols, room-based chat, federated feeds, signed-event relays,
-encrypted groups, on-chain events) carry the messages; AIFP carries the *rules of the conversation* and attaches
-to any of those protocols through declared transport bindings. AIFP and agent communication are therefore not
-two separate things: AIFP is the communication-paradigm standard, and communication protocols are the
-transports it governs. See [AIFP and agent communication](#aifp-and-agent-communication) below for the
-term-by-term mapping.
+For readers who come from messaging and agent-communication protocols, AIFP can be read in that vocabulary:
+for any context in which agents (or agents and humans) exchange information - a broadcast feed, a panel, a
+closed group, a meeting, a one-to-one exchange, a shared blackboard, a dispatch queue - it records one
+verifiable answer to who may observe, who may contribute, who may forward what they read, which version of the
+rules decides, and which conditions cannot be verified. The protocols (task and tool protocols, room-based
+chat, federated feeds, signed-event relays, encrypted groups, on-chain events) carry the messages; AIFP records
+the rules of the context and attaches to any of those protocols through declared transport bindings. This is a
+reading aid, not a redefinition - see [AIFP in agent-communication terms](#aifp-in-agent-communication-terms)
+for the term-by-term mapping.
 
 - ERC text: [`ERCS/erc-aifp.md`](ERCS/erc-aifp.md) (placeholder number 9999 until an editor assigns one)
 - Assets as filed with the ERC: [`assets/erc-aifp/`](assets/erc-aifp/README.md)
@@ -39,13 +37,13 @@ on Sepolia with the boundary-case evidence run recorded in [`docs/sepolia-eviden
 
 Message transport is out of scope; transports attach through declared bindings with capability bits.
 
-## AIFP and agent communication
+## AIFP in agent-communication terms
 
-AIFP is best read as the **rules layer of agent communication**. A communication protocol decides how bytes
-move between agents; AIFP decides, for a given conversation, who may take part, in which way, and under which
-version of the rules - and records those decisions where every participant and every transport can verify
-them. The two layers are designed to be used together: every AIFP concept has a direct agent-communication
-reading, and every agent-communication context can be described as an AIFP channel.
+An explanatory mapping. AIFP standardizes flow paradigms, channels, participation and verification as defined
+by the ERC text; the table below says how each of those concepts reads for someone who builds or operates an
+agent communication system. A communication protocol decides how bytes move between agents; an AIFP channel
+records, for a given context, who may take part, in which way, and under which version of the rules, where
+every participant and every transport can verify it.
 
 | AIFP term | Agent-communication reading |
 | --- | --- |
@@ -61,7 +59,7 @@ reading, and every agent-communication context can be described as an AIFP chann
 | Transport binding with capability bits | the attachment of a concrete agent communication protocol (room, feed, relay, group, event log) to the channel |
 | Event anchor | a verifiable commitment that a message, forward, derivation or retraction happened in the channel |
 
-Consequences for implementers of agent communication systems:
+What follows for implementers of communication systems:
 
 - An agent that speaks a communication protocol does not need to replace it to adopt AIFP; it declares the
   protocol as a transport binding and reads admission, redistribution and rule-version answers from the

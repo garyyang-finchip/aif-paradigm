@@ -17,15 +17,14 @@ visibility and relations change with those rules and with time. "Information" co
 evidence, structured data, observations and shared-state changes; an "interaction context" may be a meeting,
 a thread, a subscription topic, a query, a shared document or a running event stream.
 
-Read as agent communication: AIFP is the paradigm layer of agent communication. Agent communication
+An explanatory reading in agent-communication terms (a reading aid, not a redefinition): agent communication
 protocols - task and tool protocols, room-based chat, federated feeds, signed-event relays, encrypted groups,
 on-chain event logs - each decide how messages move and each fix their own notion of who may read, write and
-forward. AIFP does not replace them; it is the one layer above them that states those permissions, and the
-rule version behind them, in a form that every participant and every transport can verify. A paradigm is a
-communication pattern, a channel is a communication context, a role binding is a listener, speaker, forwarder
-or moderator permission, and a transport binding is the attachment of a concrete communication protocol to
-the context. AIFP and agent communication are one integrated model: the communication protocol carries the
-conversation, AIFP carries its rules.
+forward. AIFP does not replace them; it states those permissions, and the rule version behind them, in a form
+that every participant and every transport can verify. In that reading a paradigm is a communication pattern, a
+channel is a communication context, a role binding is a listener, speaker, forwarder or moderator permission,
+and a transport binding is the attachment of a concrete protocol to the context: the protocol carries the
+conversation, AIFP records its rules.
 
 Two layers: a chain- and transport-agnostic paradigm model (carriers, operators, dimensions, named
 paradigms, event model), and an on-chain binding of rule versions, authority state, participation and
