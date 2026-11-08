@@ -1,5 +1,5 @@
 {
-  "name": "agent-information-flow",
+  "name": "aif-paradigm",
   "version": "0.1.0",
   "description": "Agent Information Flow Paradigm (AIFP) - reference implementation, canonical validator and vectors",
   "type": "module",

@@ -1,4 +1,6 @@
-# Ethereum Magicians post (draft)
+# Ethereum Magicians post
+
+Posted 2026-11-08 as https://ethereum-magicians.org/t/draft-erc-agent-information-flow-paradigm-aifp-versioned-composable-rules-for-how-agents-provide-observe-and-redistribute-information/30300
 
 Title: Draft ERC: Agent Information Flow Paradigm (AIFP) - versioned, composable rules for how agents provide, observe and redistribute information
 

@@ -17,7 +17,7 @@ descriptor and predicate JSON schemas, 17 example descriptors, and vectors (subj
 encodings, outcome tables, interface identifiers, paradigm identifiers). The Test Cases section of the ERC is
 self-contained and reproduces the key vectors inline.
 
-**Discussion.** Ethereum Magicians thread: (link)
+**Discussion.** Ethereum Magicians thread: https://ethereum-magicians.org/t/draft-erc-agent-information-flow-paradigm-aifp-versioned-composable-rules-for-how-agents-provide-observe-and-redistribute-information/30300
 
 **Repository.** Reference repository with the Foundry suite (152 tests, 12 boundary cases), the canonical
-validator and the evidence scripts: (link)
+validator and the evidence scripts: https://github.com/garyyang-finchip/aif-paradigm
