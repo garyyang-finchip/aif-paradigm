@@ -65,6 +65,14 @@ Commit `deployments/11155111*.json` and summarize the run in `docs/sepolia-evide
 version, runtime code hashes, transaction list with block numbers, and the Sourcify match status. The
 Magicians thread gets a short reply pointing to that file.
 
+## Run record
+
+The run of 2026-11-08 is recorded in `docs/sepolia-evidence.md`. Two observations from it that matter for a
+repeat: Sepolia's `eth_estimateGas` for contract creation was about 5.35 times the local Anvil figure (take gas
+limits from the network, never from a local estimate), and the network did not enforce a per-transaction gas
+cap at 2^24, so `AIFPParticipationRegistry` deploys in one transaction (21.5M gas). `AIFP_DELAY=3000` left a
+comfortable margin for the ~45 phase-1 transactions.
+
 ## Notes
 
 - The scripts are the same ones rehearsed on a local anvil (`anvil --port 8545`, then the commands above with

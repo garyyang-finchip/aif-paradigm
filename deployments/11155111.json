@@ -1,0 +1,122 @@
+{
+  "AIFPChannelRegistry": "0x59c42e471c823a874d7d8E1820DF0A643c340d17",
+  "AIFPCompositeVerifier": "0x0Eb8923fdc4E3e60E2252B62A139582C824A5226",
+  "AIFPEventAnchor": "0xCcdf6647c90E8C3eC382eF2C46fa2Be3a74bCd08",
+  "AIFPObjectionWindow": "0x8ea02f7ca49E26D63689Bd98bc026C13810a8664",
+  "AIFPParadigmRegistry": "0xe5CC5dc02D282Ca1A980Ed586b509Ac9144Dd985",
+  "AIFPParticipationRegistry": "0x6d0d5A589cdBd07C432C1874f11dF3804b309fd0",
+  "AIFPSubjectSet": "0x4D72639CB1044091E8136105c7E6381ac973aE3A",
+  "chainId": 11155111,
+  "clockMode": "mode=timestamp",
+  "deployedAt": 1794142452,
+  "deployer": "0xfaf78B3D533411Bb921d119a9881C04060869065",
+  "deployerNonceRange": [
+    8,
+    15
+  ],
+  "build": {
+    "solc": "0.8.28",
+    "evmVersion": "cancun",
+    "optimizer": true,
+    "optimizerRuns": 200,
+    "viaIR": false
+  },
+  "transactions": [
+    {
+      "nonce": 8,
+      "contract": "AIFPParadigmRegistry",
+      "address": "0xe5CC5dc02D282Ca1A980Ed586b509Ac9144Dd985",
+      "tx": "0x82119a5c49bd952d51f799385515c524dc906e571c0460298d2d112d94cc2dfe",
+      "block": 12090710,
+      "gasUsed": 6177081,
+      "runtimeBytes": 3860,
+      "runtimeKeccak256": "0x43e97ba30651be8fda327d2eedee3c3bd275dcb623b63428f12e5ac7b3e876ce"
+    },
+    {
+      "nonce": 9,
+      "contract": "AIFPCompositeVerifier",
+      "address": "0x0Eb8923fdc4E3e60E2252B62A139582C824A5226",
+      "tx": "0xc975532e95fd2ecd1dc6b62c47f14d20eeb1075c9d44ebba9b518b640c7c1198",
+      "block": 12090710,
+      "gasUsed": 5490455,
+      "runtimeBytes": 3416,
+      "runtimeKeccak256": "0x3601a55d3d857c529c9932b2a5505990d205d257e24b594e875ae91972cccd48"
+    },
+    {
+      "nonce": 10,
+      "contract": "AIFPChannelRegistry",
+      "address": "0x59c42e471c823a874d7d8E1820DF0A643c340d17",
+      "tx": "0x6d33cb66aba4d903767f159eabc783c7b91394aa1425e7cae40eb8efcf94a24b",
+      "block": 12090719,
+      "gasUsed": 15388437,
+      "runtimeBytes": 9816,
+      "runtimeKeccak256": "0x4c6e0b073fdcd1acd73b50397e742425c6ceecbe9afe49b8a0ef1db21375b6f7"
+    },
+    {
+      "nonce": 11,
+      "contract": "AIFPParticipationRegistry",
+      "address": "0x6d0d5A589cdBd07C432C1874f11dF3804b309fd0",
+      "tx": "0xd27d7b4f5b7a2a14b3f39eaa19c2be0568d8d6ca9c642dab4172a2a0f661542c",
+      "block": 12090731,
+      "gasUsed": 21484141,
+      "runtimeBytes": 13759,
+      "runtimeKeccak256": "0x6342befc0e64005f3c27152978024c9be437fd87c6e4b4ed1279ffbea5a2dec1"
+    },
+    {
+      "nonce": 12,
+      "call": "AIFPChannelRegistry.setParticipationRegistry",
+      "tx": "0x2a4d180d4be89c6df4604c6cdd6bdacaea5c7c226a3bbcf4dc61ff548f23909a",
+      "block": 12090745,
+      "gasUsed": 126179
+    },
+    {
+      "nonce": 13,
+      "contract": "AIFPEventAnchor",
+      "address": "0xCcdf6647c90E8C3eC382eF2C46fa2Be3a74bCd08",
+      "tx": "0xb3b4d053a4363f52da2404a7a162c3eb6b7ed197a0e938846ffad87ac22d0534",
+      "block": 12090745,
+      "gasUsed": 6542421,
+      "runtimeBytes": 4095,
+      "runtimeKeccak256": "0x322fc04c5baf4a1edd69a4e6aee977d7c9be0d7e279e4326f9777fe0ec281f51"
+    },
+    {
+      "nonce": 14,
+      "contract": "AIFPObjectionWindow",
+      "address": "0x8ea02f7ca49E26D63689Bd98bc026C13810a8664",
+      "tx": "0xe8b1294f700b13b375322669d3881107bbfe3365b1040906294db97d29b2287a",
+      "block": 12090745,
+      "gasUsed": 8544418,
+      "runtimeBytes": 5390,
+      "runtimeKeccak256": "0xc6c4bc303ba4d045470ac5494b9c44c8ea95603544b1144e2055a40b26d4ecbf"
+    },
+    {
+      "nonce": 15,
+      "contract": "AIFPSubjectSet",
+      "address": "0x4D72639CB1044091E8136105c7E6381ac973aE3A",
+      "tx": "0xad2bba666bf6bb326319a48f23a53f62eed32455bfc1826984ad3a436709ca8a",
+      "block": 12090745,
+      "gasUsed": 1925486,
+      "runtimeBytes": 1038,
+      "runtimeKeccak256": "0xeeb2b52a19a48d2a34a72f4bc447ab6cc7a2fb7504d5c2cd07cf3060acd9a2df"
+    }
+  ],
+  "superseded": [
+    {
+      "nonce": 6,
+      "contract": "AIFPParadigmRegistry",
+      "address": "0x06e5e749d83063afceaf20a88590badab12e963f",
+      "tx": "0x740f5b72c350cfc80a7d380a1d21bdb0fea6d4291225fde277ca92b0742a9fde",
+      "block": 12090588,
+      "gasUsed": 6177081,
+      "note": "same build; calibration deploy, not part of the stack"
+    },
+    {
+      "nonce": 7,
+      "tx": "0x8924a5c22bb8dbf46cf6db9056c505b097f2c02387a66dad4b254a1d0a789483",
+      "block": 12090686,
+      "gasLimit": 20000000,
+      "gasUsed": 12000,
+      "note": "self-transfer probe; confirmed that no 2^24 per-transaction gas cap is enforced"
+    }
+  ]
+}

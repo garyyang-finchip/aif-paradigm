@@ -6,7 +6,9 @@ Title: Add ERC: Agent Information Flow Paradigm
 
 This PR adds a new draft ERC, **Agent Information Flow Paradigm (AIFP)**: versioned, composable rules for how
 agents provide, observe and redistribute information in a channel, with scoped role bindings and
-four-valued verification.
+four-valued verification. AIFP is the paradigm layer of agent communication: agent communication protocols
+carry the messages and attach to a channel as transport bindings, and AIFP states who may observe, contribute
+and redistribute in that context, under which version of the rules.
 
 **Scope.** Three registries (paradigms, channels, participation), a predicate verifier interface, canonical
 descriptor and subject-reference encodings, and optional profiles for event anchoring and absence

@@ -65,3 +65,29 @@ tender and economic-unit registries are attached through predicate leaves and bi
 4. Are the eleven identification conditions the right decidable core, given that they may overlap?
 
 PR to be added after filing.
+
+---
+
+## Reply: Sepolia evidence (phase 2 completed 2026-11-08; to be posted)
+
+**Sepolia evidence run.** The reference stack is deployed on Sepolia from the build in the repository, and the
+two-phase run of boundary cases 1, 4, 5, 8, 9 and 11 with three actors is recorded with transaction hashes, gas,
+runtime code hashes and read-outs in `docs/sepolia-evidence.md` and `deployments/11155111*.json`:
+
+- `AIFPParadigmRegistry` `0xe5CC5dc02D282Ca1A980Ed586b509Ac9144Dd985`
+- `AIFPChannelRegistry` `0x59c42e471c823a874d7d8E1820DF0A643c340d17`
+- `AIFPParticipationRegistry` `0x6d0d5A589cdBd07C432C1874f11dF3804b309fd0`
+- `AIFPCompositeVerifier` `0x0Eb8923fdc4E3e60E2252B62A139582C824A5226`
+- `AIFPEventAnchor` `0xCcdf6647c90E8C3eC382eF2C46fa2Be3a74bCd08`, `AIFPObjectionWindow`
+  `0x8ea02f7ca49E26D63689Bd98bc026C13810a8664`
+
+What the run shows on a public network, in the terms of the four thread questions: a binding evaluated at a
+timepoint before a rule change still answers SATISFIED after the change (history is a pure function of registry
+state), while the same subject answers UNDETERMINABLE (pending re-admission) at the present timepoint until
+`confirmReadmission`; the replayed old predicate is rejected with a hash mismatch rather than recorded as
+NOT_SATISFIED; the DISCLOSED record is followed by a RESTRICTED record and both remain; and the objection window
+resolves to DEFAULT_TRIGGERED when no objection is registered and the integrity condition holds. Sealed bids were
+committed in phase 1 and revealed in phase 2 as superseding anchors.
+
+One operational note for anyone reproducing it: Sepolia currently prices contract creation at roughly five times
+a local Anvil estimate, so take gas limits from the network's estimates. Repository: see the first post.

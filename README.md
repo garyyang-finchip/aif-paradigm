@@ -1,8 +1,20 @@
 # Agent Information Flow Paradigm (AIFP)
 
-Reference implementation, canonical validator, example descriptors, vectors and boundary cases for the
-ERC draft **Agent Information Flow Paradigm** - versioned, composable rules for how agents provide, observe
-and redistribute information in a channel, with scoped role bindings and four-valued verification.
+**The paradigm layer of agent communication.** Reference implementation, canonical validator, example
+descriptors, vectors and boundary cases for the ERC draft **Agent Information Flow Paradigm** - versioned,
+composable rules for how agents provide, observe and redistribute information in a channel, with scoped role
+bindings and four-valued verification.
+
+In plain terms, AIFP standardizes **agent communication**: for any context in which agents (or agents and
+humans) exchange information - a broadcast feed, a panel, a closed group, a meeting, a one-to-one exchange, a
+shared blackboard, a dispatch queue - it gives one verifiable answer to who may observe, who may contribute,
+who may forward what they read, which version of the rules decides, and which conditions cannot be verified.
+Agent communication protocols (task and tool protocols, room-based chat, federated feeds, signed-event relays,
+encrypted groups, on-chain events) carry the messages; AIFP carries the *rules of the conversation* and attaches
+to any of those protocols through declared transport bindings. AIFP and agent communication are therefore not
+two separate things: AIFP is the communication-paradigm standard, and communication protocols are the
+transports it governs. See [AIFP and agent communication](#aifp-and-agent-communication) below for the
+term-by-term mapping.
 
 - ERC text: [`ERCS/erc-aifp.md`](ERCS/erc-aifp.md) (placeholder number 9999 until an editor assigns one)
 - Assets as filed with the ERC: [`assets/erc-aifp/`](assets/erc-aifp/README.md)
@@ -10,8 +22,10 @@ and redistribute information in a channel, with scoped role bindings and four-va
 - Boundary cases: [`docs/boundary-cases.md`](docs/boundary-cases.md)
 - Sepolia runbook: [`docs/sepolia-runbook.md`](docs/sepolia-runbook.md)
 
-Status: v0.1.0 - draft text, reference contracts, 152 Foundry tests, validator and vectors complete;
-Ethereum Magicians thread and ethereum/ERCs pull request pending; Sepolia evidence run pending.
+Status: v0.1.1 - draft text, reference contracts, 152 Foundry tests, validator and vectors complete;
+Ethereum Magicians thread [#30300](https://ethereum-magicians.org/t/draft-erc-agent-information-flow-paradigm-aifp-versioned-composable-rules-for-how-agents-provide-observe-and-redistribute-information/30300)
+and ethereum/ERCs pull request [#2152](https://github.com/ethereum/ERCs/pull/2152) open; reference stack deployed
+on Sepolia with the boundary-case evidence run recorded in [`docs/sepolia-evidence.md`](docs/sepolia-evidence.md).
 
 ## What it standardizes
 
@@ -24,6 +38,39 @@ Ethereum Magicians thread and ethereum/ERCs pull request pending; Sepolia eviden
 | Profiles | event anchoring, objection windows | `AIFPEventAnchor`, `AIFPObjectionWindow` |
 
 Message transport is out of scope; transports attach through declared bindings with capability bits.
+
+## AIFP and agent communication
+
+AIFP is best read as the **rules layer of agent communication**. A communication protocol decides how bytes
+move between agents; AIFP decides, for a given conversation, who may take part, in which way, and under which
+version of the rules - and records those decisions where every participant and every transport can verify
+them. The two layers are designed to be used together: every AIFP concept has a direct agent-communication
+reading, and every agent-communication context can be described as an AIFP channel.
+
+| AIFP term | Agent-communication reading |
+| --- | --- |
+| Paradigm | the communication pattern in force: broadcast, panel, closed group, meeting, peer-to-peer, intake, blackboard, dispatch, forward, derive |
+| Channel | one communication context: a feed, a room, a thread, a topic, a shared document, an event stream |
+| Carrier (addressed delivery / shared object) | message passing versus a shared state that participants read and write |
+| Structural operators (fan-out, fan-in, feedback, n-party, select, forward, derive, merge) | the shapes a conversation can take: one-to-many, many-to-one, reply, group, routed, relayed, summarized, combined |
+| Rule dimensions (discovery, observation, contribution, management, redistribution, history, time, ...) | who can find the conversation, read it, speak in it, moderate it, forward it, see its history, and when |
+| Role binding (`OBSERVE`, `SUBMIT`, `RESPOND`, `REDISTRIBUTE`, `MANAGE_*`) | listener, speaker, replier, forwarder and moderator permissions for one agent in one context |
+| Predicate verification (four-valued outcome) | the admission check an agent passes before it may listen or speak - credential, allowlist, stake, identity, decision - with "cannot verify" kept distinct from "denied" |
+| Adoption with `effectiveAt` | a scheduled change of the communication rules that every participant can see coming |
+| Disclosure record (`DISCLOSED` / `RESTRICTED`) | an append-only log of what the conversation has been opened to or closed off from |
+| Transport binding with capability bits | the attachment of a concrete agent communication protocol (room, feed, relay, group, event log) to the channel |
+| Event anchor | a verifiable commitment that a message, forward, derivation or retraction happened in the channel |
+
+Consequences for implementers of agent communication systems:
+
+- An agent that speaks a communication protocol does not need to replace it to adopt AIFP; it declares the
+  protocol as a transport binding and reads admission, redistribution and rule-version answers from the
+  registries.
+- Two agents on different communication protocols can still agree on who may read, write and forward in a
+  shared context, because the AIFP channel, not the transport, is the source of truth for those questions.
+- Human participants fit the same model: the seven familiar human communication forms (source, panel, club,
+  meeting and three kinds of one-to-one exchange) are named paradigms with decidable identification
+  conditions, alongside the agent-native forms.
 
 ## Repository layout
 
@@ -67,7 +114,26 @@ tests without submodules or network access beyond the compiler download.
 
 ## Deployments
 
-None yet. The Sepolia evidence run follows `docs/sepolia-runbook.md`; records land in `deployments/`.
+Sepolia (chain id 11155111), deployed from the build described in `foundry.toml`; full record with transaction
+hashes, gas, runtime code hashes and the two-phase boundary-case run in
+[`docs/sepolia-evidence.md`](docs/sepolia-evidence.md) and `deployments/11155111*.json`.
+
+| Contract | Address |
+| --- | --- |
+| `AIFPParadigmRegistry` | `0xe5CC5dc02D282Ca1A980Ed586b509Ac9144Dd985` |
+| `AIFPCompositeVerifier` | `0x0Eb8923fdc4E3e60E2252B62A139582C824A5226` |
+| `AIFPChannelRegistry` | `0x59c42e471c823a874d7d8E1820DF0A643c340d17` |
+| `AIFPParticipationRegistry` | `0x6d0d5A589cdBd07C432C1874f11dF3804b309fd0` |
+| `AIFPEventAnchor` | `0xCcdf6647c90E8C3eC382eF2C46fa2Be3a74bCd08` |
+| `AIFPObjectionWindow` | `0x8ea02f7ca49E26D63689Bd98bc026C13810a8664` |
+| `AIFPSubjectSet` (roster used by the cases) | `0x4D72639CB1044091E8136105c7E6381ac973aE3A` |
+
+## Authors and contributors
+
+- **Gary Yang** ([@garyyang-finchip](https://github.com/garyyang-finchip)) - author of the ERC text, the
+  paradigm model and the reference implementation.
+- **Chelsey Huang** ([@chenxihuang1028-a11y](https://github.com/chenxihuang1028-a11y)) - contributor;
+  conceptual contributions to the paradigm model and its agent-communication framing.
 
 ## License
 
