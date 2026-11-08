@@ -133,6 +133,8 @@ hashes, gas, runtime code hashes and the two-phase boundary-case run in
 - **Chelsey Huang** ([@chenxihuang1028-a11y](https://github.com/chenxihuang1028-a11y)) - contributor;
   conceptual contributions to the paradigm model and its agent-communication framing.
 
+The full list is kept in [`CONTRIBUTORS.md`](CONTRIBUTORS.md).
+
 ## License
 
 CC0-1.0 for the ERC text and assets (see `LICENSE`).
