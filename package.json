@@ -1,0 +1,21 @@
+{
+  "name": "agent-information-flow",
+  "version": "0.1.0",
+  "description": "Agent Information Flow Paradigm (AIFP) - reference implementation, canonical validator and vectors",
+  "type": "module",
+  "private": true,
+  "license": "CC0-1.0",
+  "scripts": {
+    "validate": "node tools/descriptor-validate.mjs",
+    "vectors": "node tools/make-vectors.mjs",
+    "check": "node tools/check.mjs"
+  },
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "ethers": "^6.13.4"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
