@@ -1,1 +1,72 @@
+name: CI
 
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  contracts:
+    name: Foundry build and tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Build
+        run: forge build --sizes
+      - name: Test
+        run: forge test -vvv
+      - name: Upload ABI artifacts for the tooling job
+        uses: actions/upload-artifact@v4
+        with:
+          name: forge-out
+          path: out/
+          retention-days: 1
+
+  tooling:
+    name: Validator, examples and vectors
+    runs-on: ubuntu-latest
+    needs: contracts
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Download ABI artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: forge-out
+          path: out/
+      - name: Install
+        run: npm ci
+      - name: Validate every example descriptor
+        run: node tools/descriptor-validate.mjs assets/erc-aifp/examples/paradigms/*.json assets/erc-aifp/examples/composites/*.json --quiet
+      - name: Invalid examples must be rejected, vectors must be reproducible
+        run: npm run check
+      - name: Vectors committed match regenerated vectors
+        run: |
+          npm run vectors
+          git diff --exit-code -- assets/erc-aifp/vectors
+
+  filing:
+    name: Filing package lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Lint the ERC text and build the placeholder package
+        run: |
+          if [ -f ERCS/erc-aifp.md ]; then
+            python3 tools/make-filing-package.py --out /tmp/ercs-pr-package
+          else
+            echo "ERCS/erc-aifp.md not present yet; skipping"
+          fi
