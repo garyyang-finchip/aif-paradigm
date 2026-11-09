@@ -1,7 +1,8 @@
 # AIFP design memo (v0.1.1)
 
-This memo records the design reasoning behind the ERC text in `ERCS/erc-aifp.md`. The normative text is the
-ERC; this document explains why it is shaped as it is and lists what was deliberately left out of version 1.
+This memo records the design reasoning behind the ERC text in `ERCS/erc-aifp.md`, filed as ERC-8489. The
+normative text is the ERC; this document explains why it is shaped as it is and lists what was deliberately left
+out of version 1.
 
 ## 1. Position
 

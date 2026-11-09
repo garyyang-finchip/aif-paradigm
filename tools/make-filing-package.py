@@ -6,9 +6,10 @@ Writes  ercs-pr-package/ERCS/erc-<N>.md and ercs-pr-package/assets/erc-<N>/...
 
     python3 tools/make-filing-package.py [--number N] [--discussions-to URL] [--out DIR] [--source FILE]
 
-N defaults to 9999 (the placeholder used before an editor assigns a number). Inside the markdown the
-asset links are rewritten from ../assets/eip-aifp/ to ../assets/eip-<N>/ because the ERCs site serves the
-erc-* asset directories under eip-* URLs. The script then lints the result the way the ERCs CI does:
+N defaults to 8489, the number assigned to the ERC by the editors (9999 was the placeholder before the
+assignment and is still recognised by the lint). Inside the markdown the asset links are rewritten from
+../assets/eip-aifp/ to ../assets/eip-<N>/ because the ERCs site serves the erc-* asset directories under
+eip-* URLs. The script then lints the result the way the ERCs CI does:
 
   * title at most 44 characters and without the word "standard"
   * required front-matter keys present
@@ -30,6 +31,7 @@ import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
+ASSIGNED_NUMBER = "8489"  # assigned in ethereum/ERCs pull request #2152 on 2026-11-09
 REQUIRED_KEYS = ["eip", "title", "description", "author", "discussions-to", "status", "type", "category", "created", "requires"]
 ASSET_DIRS = ["contracts", "schemas", "examples", "vectors"]
 EXCLUDED_PARTS = {"out", "invalid", "node_modules", "cache"}
@@ -118,8 +120,8 @@ def lint(front: list[str], body: str, number: str) -> tuple[list[str], list[str]
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--number", default="9999", help="ERC number (default 9999 placeholder)")
-    ap.add_argument("--discussions-to", dest="discussions", default=None, help="Ethereum Magicians thread URL")
+    ap.add_argument("--number", default=ASSIGNED_NUMBER, help=f"ERC number (default {ASSIGNED_NUMBER}, the assigned number)")
+    ap.add_argument("--discussions-to", dest="discussions", default=None, help="Ethereum Magicians thread URL (default: the source front matter)")
     ap.add_argument("--out", default=str(REPO / "ercs-pr-package"), help="output directory")
     ap.add_argument("--source", default=str(REPO / "ERCS" / "erc-aifp.md"), help="source ERC markdown")
     ap.add_argument("--assets", default=str(REPO / "assets" / "erc-aifp"), help="source assets directory")

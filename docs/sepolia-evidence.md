@@ -12,7 +12,7 @@ computed. All transactions in this document are included with status `0x1` unles
 
 | Item | Value |
 | --- | --- |
-| Source | this repository, `assets/erc-aifp/contracts/` as filed with the ERC draft (v0.1.1) |
+| Source | this repository, `assets/erc-aifp/contracts/` as filed with ERC-8489 (draft, v0.1.1; `assets/erc-8489/contracts/` in ethereum/ERCs) |
 | Compiler | solc 0.8.28, EVM version `cancun`, optimizer enabled with 200 runs, no IR pipeline (`foundry.toml`) |
 | Build check | the CBOR metadata hash at the end of each deployed runtime equals the one in the local `forge build` artifact for the same contract (seven of seven) |
 | Deployer / channel authority (A) | `0xfaf78B3D533411Bb921d119a9881C04060869065` |

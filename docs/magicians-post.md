@@ -1,12 +1,15 @@
 # Ethereum Magicians post
 
-Topic: https://ethereum-magicians.org/t/draft-erc-agent-information-flow-paradigm-aifp-versioned-composable-rules-for-how-agents-provide-observe-and-redistribute-information/30300
-(posted 2026-11-08; the first post was revised the same day after the PR and the Sepolia run - the topic id, and
-therefore the `discussions-to` link in the ERC, is unchanged).
+Topic: https://ethereum-magicians.org/t/erc-8489-agent-information-flow-paradigm/30300
+(posted 2026-11-08 under the title "Draft ERC: Agent Information Flow Paradigm (AIFP) - versioned, composable rules
+for how agents provide, observe and redistribute information"; the first post was revised the same day after the
+PR and the Sepolia run; on 2026-11-09 the editors assigned ERC-8489 and retitled the topic "ERC-8489: Agent
+Information Flow Paradigm". The topic id 30300 is unchanged; the `discussions-to` link in the ERC now uses the
+new slug, and the old URL redirects to it.)
 
 ## First post (revised)
 
-Title: Draft ERC: Agent Information Flow Paradigm (AIFP) - versioned, composable rules for how agents provide, observe and redistribute information
+Title: ERC-8489: Agent Information Flow Paradigm
 
 Category: ERCs
 
@@ -23,10 +26,16 @@ a scope, a basis, a validity interval and the rule version they were granted und
 checked by composable predicates that answer one of four outcomes: satisfied, not satisfied,
 undeterminable, verifier error.
 
-**Status.** Draft text and assets filed as ethereum/ERCs PR [#2152](https://github.com/ethereum/ERCs/pull/2152)
-(placeholder number 9999 until an editor assigns one). Reference repository with the Foundry suite, the canonical
-validator and the vectors: [garyyang-finchip/aif-paradigm](https://github.com/garyyang-finchip/aif-paradigm).
-The reference stack is deployed on Sepolia and the boundary-case evidence run is recorded (section below).
+**Status.** Draft. Filed as ethereum/ERCs PR [#2152](https://github.com/ethereum/ERCs/pull/2152); the editors
+assigned the number ERC-8489 on 2026-11-09 (`ERCS/erc-8489.md`, assets under `assets/erc-8489/`). Reference
+repository with the Foundry suite, the canonical validator and the vectors:
+[garyyang-finchip/aif-paradigm](https://github.com/garyyang-finchip/aif-paradigm). The reference stack is
+deployed on Sepolia and the boundary-case evidence run is recorded (section below).
+
+**Links.** ERC text as filed: [ERCS/erc-8489.md](https://github.com/garyyang-finchip/ERCs/blob/add-erc-aif-paradigm/ERCS/erc-8489.md)
+(ethereum/ERCs pull request [#2152](https://github.com/ethereum/ERCs/pull/2152)) - reference repository:
+[garyyang-finchip/aif-paradigm](https://github.com/garyyang-finchip/aif-paradigm) - Sepolia evidence:
+[docs/sepolia-evidence.md](https://github.com/garyyang-finchip/aif-paradigm/blob/main/docs/sepolia-evidence.md).
 
 **What is new relative to existing systems.** Agent task protocols, tool protocols, matrix-style rooms,
 federated activity feeds, signed-event relays, encrypted groups and on-chain events each fix their own

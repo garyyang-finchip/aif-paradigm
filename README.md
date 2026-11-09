@@ -1,8 +1,9 @@
-# Agent Information Flow Paradigm (AIFP)
+# Agent Information Flow Paradigm (AIFP) - ERC-8489
 
-Reference implementation, canonical validator, example descriptors, vectors and boundary cases for the
-ERC draft **Agent Information Flow Paradigm** - versioned, composable rules for how agents provide, observe
-and redistribute information in a channel, with scoped role bindings and four-valued verification.
+Reference implementation, canonical validator, example descriptors, vectors and boundary cases for
+**ERC-8489: Agent Information Flow Paradigm** (status Draft) - versioned, composable rules for how agents
+provide, observe and redistribute information in a channel, with scoped role bindings and four-valued
+verification.
 
 For readers who come from messaging and agent-communication protocols, AIFP can be read in that vocabulary:
 for any context in which agents (or agents and humans) exchange information - a broadcast feed, a panel, a
@@ -14,14 +15,16 @@ the rules of the context and attaches to any of those protocols through declared
 reading aid, not a redefinition - see [AIFP in agent-communication terms](#aifp-in-agent-communication-terms)
 for the term-by-term mapping.
 
-- ERC text: [`ERCS/erc-aifp.md`](ERCS/erc-aifp.md) (placeholder number 9999 until an editor assigns one)
-- Assets as filed with the ERC: [`assets/erc-aifp/`](assets/erc-aifp/README.md)
+- ERC text: [`ERCS/erc-aifp.md`](ERCS/erc-aifp.md) (source of `ERCS/erc-8489.md` in ethereum/ERCs; the
+  filing package applies the number)
+- Assets as filed with the ERC: [`assets/erc-aifp/`](assets/erc-aifp/README.md) (filed as `assets/erc-8489/`)
 - Design memo: [`docs/design-memo.md`](docs/design-memo.md)
 - Boundary cases: [`docs/boundary-cases.md`](docs/boundary-cases.md)
 - Sepolia runbook: [`docs/sepolia-runbook.md`](docs/sepolia-runbook.md)
 
-Status: v0.1.1 - draft text, reference contracts, 152 Foundry tests, validator and vectors complete;
-Ethereum Magicians thread [#30300](https://ethereum-magicians.org/t/draft-erc-agent-information-flow-paradigm-aifp-versioned-composable-rules-for-how-agents-provide-observe-and-redistribute-information/30300)
+Status: v0.1.1 - number ERC-8489 assigned by the editors on 2026-11-09; draft text, reference contracts,
+152 Foundry tests, validator and vectors complete; Ethereum Magicians thread
+[ERC-8489: Agent Information Flow Paradigm](https://ethereum-magicians.org/t/erc-8489-agent-information-flow-paradigm/30300)
 and ethereum/ERCs pull request [#2152](https://github.com/ethereum/ERCs/pull/2152) open; reference stack deployed
 on Sepolia with the boundary-case evidence run recorded in [`docs/sepolia-evidence.md`](docs/sepolia-evidence.md).
 
@@ -73,7 +76,7 @@ What follows for implementers of communication systems:
 ## Repository layout
 
 ```
-ERCS/erc-aifp.md                      ERC text (source; the filing package renames it)
+ERCS/erc-aifp.md                      ERC text (source; the filing package writes it as ERCS/erc-8489.md)
 assets/erc-aifp/contracts/            interfaces, libraries, reference registries, verifier, profiles, companions
 assets/erc-aifp/schemas/              descriptor, predicate, binding-capabilities and subject-ref schemas
 assets/erc-aifp/examples/             11 named paradigms, 6 composites, 4 deliberately invalid descriptors
@@ -94,8 +97,8 @@ forge build
 forge test                                   # 152 tests, 24 suites; no `forge install` needed
 npm ci && npm run check                      # validates every example, rejects the invalid ones, regenerates vectors
 node tools/descriptor-validate.mjs assets/erc-aifp/examples/paradigms/panel.json --brief
-python3 tools/make-filing-package.py          # ercs-pr-package/ with placeholder 9999
-python3 tools/make-filing-package.py --number N --discussions-to URL
+python3 tools/make-filing-package.py          # ercs-pr-package/ERCS/erc-8489.md + assets/erc-8489/, linted
+python3 tools/make-filing-package.py --number N --discussions-to URL   # only to override the number or thread
 ```
 
 The test suite declares its own cheatcode interface (`test/utils/TestBase.sol`), so a fresh clone builds and

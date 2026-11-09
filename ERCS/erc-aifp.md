@@ -1,9 +1,9 @@
 ---
-eip: 9999
+eip: 8489
 title: Agent Information Flow Paradigm
 description: Versioned rules for how agents provide, observe and redistribute information in a channel, with scoped role bindings and four-valued checks
 author: Gary Yang (@garyyang-finchip)
-discussions-to: https://ethereum-magicians.org/t/draft-erc-agent-information-flow-paradigm-aifp-versioned-composable-rules-for-how-agents-provide-observe-and-redistribute-information/30300
+discussions-to: https://ethereum-magicians.org/t/erc-8489-agent-information-flow-paradigm/30300
 status: Draft
 type: Standards Track
 category: ERC

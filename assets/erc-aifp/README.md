@@ -1,6 +1,6 @@
 # AIFP assets index
 
-Reference material for the Agent Information Flow Paradigm. Read in agent-communication terms (a reading
+Reference material for ERC-8489, the Agent Information Flow Paradigm. Read in agent-communication terms (a reading
 aid, not a redefinition), AIFP records, for any context in which agents exchange information, who may observe,
 contribute and redistribute, under which version of the rules; the protocols that carry the messages attach to
 a channel as transport bindings. In that reading a paradigm is a communication pattern, a channel is a

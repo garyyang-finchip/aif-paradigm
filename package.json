@@ -1,7 +1,7 @@
 {
   "name": "aif-paradigm",
   "version": "0.1.0",
-  "description": "Agent Information Flow Paradigm (AIFP) - the paradigm layer of agent communication: reference implementation, canonical validator and vectors",
+  "description": "ERC-8489 Agent Information Flow Paradigm (AIFP): reference implementation, canonical validator and vectors; readable in agent-communication terms",
   "keywords": [
     "agent-communication",
     "agent-information-flow",
