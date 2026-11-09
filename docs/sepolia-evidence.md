@@ -12,7 +12,7 @@ computed. All transactions in this document are included with status `0x1` unles
 
 | Item | Value |
 | --- | --- |
-| Source | this repository, `assets/erc-aifp/contracts/` as filed with ERC-8489 (draft, v0.1.1; `assets/erc-8489/contracts/` in ethereum/ERCs) |
+| Source | this repository, `assets/erc-aifp/contracts/` as filed with ERC-8489 (draft, v0.1.1; `assets/erc-8489/contracts/` in ethereum/ERCs). The run predates v0.1.2, which changed `AIFPCompositeVerifier` (leaf calls by bounded `staticcall` with raw return-data checks, see `docs/design-memo.md` section 8); the verifier deployed below is the v0.1.1 build and the cases in this record do not exercise malformed leaf return data |
 | Compiler | solc 0.8.28, EVM version `cancun`, optimizer enabled with 200 runs, no IR pipeline (`foundry.toml`) |
 | Build check | the CBOR metadata hash at the end of each deployed runtime equals the one in the local `forge build` artifact for the same contract (seven of seven) |
 | Deployer / channel authority (A) | `0xfaf78B3D533411Bb921d119a9881C04060869065` |

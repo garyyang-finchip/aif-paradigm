@@ -22,8 +22,9 @@ for the term-by-term mapping.
 - Boundary cases: [`docs/boundary-cases.md`](docs/boundary-cases.md)
 - Sepolia runbook: [`docs/sepolia-runbook.md`](docs/sepolia-runbook.md)
 
-Status: v0.1.1 - number ERC-8489 assigned by the editors on 2026-11-09; draft text, reference contracts,
-152 Foundry tests, validator and vectors complete; Ethereum Magicians thread
+Status: v0.1.2 - number ERC-8489 assigned by the editors on 2026-11-09; draft text, reference contracts,
+163 Foundry tests, validator and vectors complete; v0.1.2 fixes the composite verifier's handling of leaf return
+data reported on the Magicians thread (see `docs/design-memo.md`, section 8); Ethereum Magicians thread
 [ERC-8489: Agent Information Flow Paradigm](https://ethereum-magicians.org/t/erc-8489-agent-information-flow-paradigm/30300)
 and ethereum/ERCs pull request [#2152](https://github.com/ethereum/ERCs/pull/2152) open; reference stack deployed
 on Sepolia with the boundary-case evidence run recorded in [`docs/sepolia-evidence.md`](docs/sepolia-evidence.md).
@@ -94,7 +95,7 @@ Foundry (forge 1.x, solc 0.8.28) and Node 22.
 
 ```
 forge build
-forge test                                   # 152 tests, 24 suites; no `forge install` needed
+forge test                                   # 163 tests, 25 suites; no `forge install` needed
 npm ci && npm run check                      # validates every example, rejects the invalid ones, regenerates vectors
 node tools/descriptor-validate.mjs assets/erc-aifp/examples/paradigms/panel.json --brief
 python3 tools/make-filing-package.py          # ercs-pr-package/ERCS/erc-8489.md + assets/erc-8489/, linted

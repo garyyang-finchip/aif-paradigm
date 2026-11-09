@@ -238,3 +238,49 @@ committed in phase 1 and revealed in phase 2 as superseding anchors.
 
 One operational note for anyone reproducing it: Sepolia currently prices contract creation at roughly five times
 a local Anvil estimate, so take gas limits from the network's estimates. Repository: see the first post.
+
+## Reply to the leaf return data report (posted 2026-11-09)
+
+The report (second post in the thread): `AIFPCompositeVerifier` caught a leaf that reverts but not one whose
+return data fails to decode; `try IAIFPPredicateVerifier(v).verify(...) returns (uint8)` decodes in the caller,
+so a verifier returning nothing or a word above 255 reverted `evaluate` itself, the participation registry's
+`try/catch` turned that into `VERIFIER_ERROR` for the whole predicate, and `anyOf(ALLOWLIST, EXTERNAL)` with one
+broken external verifier refused subjects on the allowlist. The `ALLOWLIST` call had the same shape with its
+`bool`. Suggested: a low-level `staticcall` with a 32-byte / value-at-most-3 check, a gas cap per leaf, and a
+sentence in the draft saying that malformed return data is `VERIFIER_ERROR` for that leaf only.
+
+Reply as posted:
+
+---
+
+Thank you - this is right, and it is a real bug in the reference verifier rather than a wording issue. A typed
+`try ... returns (uint8)` decodes the return data in the caller, so a leaf that returned nothing or a word above
+255 reverted `evaluate` itself; the registry's `try/catch` then reported `VERIFIER_ERROR` for the whole
+predicate, and `anyOf(ALLOWLIST, EXTERNAL)` with one broken external verifier refused subjects that the
+allowlist admits. I reproduced exactly that scenario in a test before changing anything (`previewAdmission`
+answered 3 for a subject on the allowlist, `admit` reverted with `AIFP_VerifierError`).
+
+What changed (v0.1.2 of the reference, in the repository and in PR #2152):
+
+- `AIFPCompositeVerifier` now makes every leaf call - `verify` and `contains` alike - as a low-level
+  `staticcall` bounded to `LEAF_GAS_LIMIT = 1_000_000` gas and judges the raw return data: success, exactly 32
+  bytes, value at most 3 (0 or 1 for `contains`). Anything else is `VERIFIER_ERROR` for that leaf only and the
+  rest of the tree is still composed; a leaf that burns its gas is contained the same way.
+- The draft now says so. Section 6.3: a composite verifier judges a leaf call by its raw return data, malformed
+  return data is that leaf's `VERIFIER_ERROR`, the gas forwarded to a leaf SHOULD be bounded and the bound
+  documented. Section 6.4 step 3 lists the leaf faults and says the remaining leaves are still evaluated.
+  Section 2.5: a fault in one leaf MUST NOT abort the evaluation of the other leaves or of the tree. The
+  Rationale and the Security Considerations explain why (the composition tables only hold if the fault stays in
+  the leaf).
+- Tests: evaluation scenario 9 in the ERC, and a new suite (`test/unit/LeafReturnData.t.sol`, eleven tests with
+  a `MisbehavingVerifier` that returns nothing, 256, 16 bytes, 64 bytes, or loops until out of gas). The faulty
+  leaf is `VERIFIER_ERROR`, `anyOf(E, open)` is `SATISFIED`, `allOf(E, open)` is `VERIFIER_ERROR`, and in your
+  scenario the registry admits the subject on the allowlist while answering `VERIFIER_ERROR` - never
+  `NOT_SATISFIED` - for a subject outside it. 163 tests pass.
+
+On the gas bound I chose a fixed per-leaf cap in the verifier rather than a per-node field, so the predicate
+encoding and the committed predicate hashes are unchanged; the EVM's 63/64 rule still applies underneath. If you
+think the bound belongs in the node (or that 1,000,000 is the wrong default), I would like to hear the argument.
+
+The Sepolia record notes that the deployed verifier is the v0.1.1 build and that the recorded cases do not
+exercise malformed leaf return data; it will be redeployed with the next evidence run.

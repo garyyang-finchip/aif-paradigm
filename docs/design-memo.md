@@ -1,4 +1,4 @@
-# AIFP design memo (v0.1.1)
+# AIFP design memo (v0.1.2)
 
 This memo records the design reasoning behind the ERC text in `ERCS/erc-aifp.md`, filed as ERC-8489. The
 normative text is the ERC; this document explains why it is shaped as it is and lists what was deliberately left
@@ -124,3 +124,21 @@ panel-to-club migration, sealed bids, blackboard, receive policies, rule update 
 and disclosure, staked agora, objection window and dispatch, with three logical participants. Cases 1, 4, 5,
 8, 9 and 11 also run on a live chain through `script/Cases.s.sol`. The Sepolia run uses three
 session-generated keys funded from a faucet; its records are committed under `deployments/`.
+
+## 8. Changes after review
+
+**v0.1.2 - leaf return data and the gas of a leaf call (reported on the Magicians thread, 2026-11-09).** The
+reference composite verifier called leaf verifiers with `try ... returns (uint8)` and subject sets with
+`try ... returns (bool)`. Solidity decodes a typed return value in the caller, so a verifier that returned no
+data, or a word above 255 (above 1 for the set), reverted the whole `evaluate` instead of becoming that leaf's
+`VERIFIER_ERROR`; the participation registry's own `try/catch` then reported `VERIFIER_ERROR` for the whole
+predicate, and `anyOf(allowlist, external)` with one broken external verifier refused subjects that the
+allowlist admits. The fix makes each leaf call a low-level `staticcall` bounded to `LEAF_GAS_LIMIT`
+(1,000,000 gas) and judges the raw return data: success, exactly one 32-byte word, value at most 3 (0 or 1 for
+`contains`); anything else is `VERIFIER_ERROR` for that leaf only. Sections 2.5, 6.3, 6.4, the Rationale and the
+Security Considerations of the ERC now state the rule (malformed return data is a leaf fault; a leaf fault never
+aborts the tree; the gas forwarded to a leaf SHOULD be bounded and the bound documented), and evaluation scenario
+9 plus the suite `test/unit/LeafReturnData.t.sol` (eleven tests, mock `MisbehavingVerifier`) cover empty, short,
+long and out-of-range return data, a gas-exhausting leaf, and the registry admitting a subject in the allowlist
+despite a broken external leaf. The Sepolia deployment recorded in `docs/sepolia-evidence.md` predates this
+change; its verifier is the v0.1.1 build.
