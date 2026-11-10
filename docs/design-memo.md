@@ -287,6 +287,15 @@ second one, on 2026-11-10, is the source of items 5b, 6b, 7b and 11 to 15).**
     first admission record, `basisRef` after `readmit`). The Security Considerations gain two paragraphs on limits
     of the reference implementation that are not changed in this round: the cap on bindings per subject, and the
     single namespace of anchored object references.
+16. *Management events name their authority (third round on the thread, 2026-11-10).* Asked on the thread, for
+    the case of a smart wallet that grants a role: the transaction sender alone does not tell an auditor which
+    account the registry authorized. Every management event of both registries now ends with `by`,
+    `authorityKind` (0 channel authority, 1 governance executor, 2 management role, 3 the subject itself) and
+    `authorizingBinding` (the manager's binding when the grounds are a role, zero otherwise), so an indexer checks
+    a grant against the role history in log order without a call trace (Sections 8.4 and 10). The grounds are
+    examined in the order of Sections 8.4 and 9.2. `RoleReinstated` is unchanged (its authority is the
+    `RoleSuspended` log). Events are not part of the ERC-165 identifiers, which do not change; the authority
+    kinds are constants of `AIFPBasis`.
 
 Interface changes: `leafGasLimit()` is added to `IAIFPCompositeVerifier` (interface identifier `0xe3fe3554`, was
 `0xa5913d6e`) and `evaluateWithBinding` to `IAIFPParticipationRegistry` (`0x1d84a105`, was `0x14c97260`). The
@@ -306,7 +315,7 @@ reverts where `admit` would be rejected. The reference channel registry gains th
 replaced by `stateChangesAtOpen`, `reportIntegrityBreak` and `IntegrityBroken` are removed, and `integrityHolds`
 and the error `ChannelNotActive` are added.
 
-Tests: 226 in all. `test/unit/LeafGas.t.sol` (twenty-three: gas sweeps, a scan of the funding boundary gas by gas
+Tests: 229 in all. `test/unit/LeafGas.t.sol` (twenty-three: gas sweeps, a scan of the funding boundary gas by gas
 for both kinds of leaf call, two fuzz properties, the warm-storage caveat, a misbehaving composite verifier behind
 a registry), `test/unit/DecisionEvidence.t.sol` (fourteen, with a fuzz over random histories for the finality of a
 passed timepoint), and additions to the composite-verifier, predicate-library (with a fuzz of `isWellFormed`
@@ -324,11 +333,6 @@ the binding, and a witness that is the latest binding instead of the earliest.
 
 Noted in this round and left alone, as candidates for the next one:
 
-- *Management events.* The kernel's management events (`RoleGranted`, `RoleReadmitted`, `ParadigmAdopted`,
-  `BindingDeclared`, `BindingRevoked`, `DisclosureRecorded`) do not name the caller or the basis on which the
-  caller was authorized - only `RoleSuspended`, `RoleReinstated` and `RoleRevoked` name the caller - and Section 10
-  says what the evidence is for them (the transaction and the log order); one added event naming caller, basis
-  and binding for every role-gated call is the candidate change.
 - *Which channel a redistribution role is needed in.* The event anchor checks the role in the channel named in
   the call, the one that receives the record. For a forward or a derivation it does not consult the channel in
   which the source object was first anchored, although `REDISTRIBUTE` is defined as the right to carry content

@@ -365,6 +365,65 @@ contract ChannelRegistryTest is Fixture {
         channels.stateChanges(bytes32("nope"));
     }
 
+    function authorityOf(Vm.Log[] memory logs, address emitter, bytes32 topic0) internal pure returns (address by, uint8 kind, bytes32 under) {
+        for (uint256 i = 0; i < logs.length; i++) {
+            if (logs[i].emitter != emitter || logs[i].topics[0] != topic0) continue;
+            bytes memory d = logs[i].data;
+            uint256 n = d.length;
+            assembly ("memory-safe") {
+                by := mload(add(add(d, 0x20), sub(n, 0x60)))
+                kind := mload(add(add(d, 0x20), sub(n, 0x40)))
+                under := mload(add(add(d, 0x20), sub(n, 0x20)))
+            }
+            return (by, kind, under);
+        }
+        revert("log not found");
+    }
+
+    /// @dev Adoption, binding declaration and revocation, and disclosure records name the caller, the grounds
+    ///      and, for a role holder, the binding relied on.
+    function test_management_events_name_their_authority() public {
+        bytes32 rulesBid = grantRoles(A, ch, B, AIFPRoles.MANAGE_RULES, 0);
+        bytes32 discBid = grantRoles(A, ch, C, AIFPRoles.MANAGE_DISCLOSURE, 0);
+        MockExecutor exec = new MockExecutor(channels, participation);
+        declare(A, ch, governanceBinding(AIFPBindings.KIND_GOVERNANCE_RULES, address(exec), AIFPBindings.EFFECT_RULES, AIFPBindings.ADOPTION_AUTOMATIC));
+
+        vm.recordLogs();
+        vm.prank(B);
+        channels.adoptParadigm(ch, P2, now48() + 10, false, 0);
+        (address by, uint8 kind, bytes32 under) = authorityOf(vm.getRecordedLogs(), address(channels), IAIFPChannelRegistry.ParadigmAdopted.selector);
+        assertTrue(by == B && kind == AIFPBasis.AUTHORITY_ROLE && under == rulesBid, "adoption by a MANAGE_RULES holder");
+
+        vm.recordLogs();
+        exec.adopt(ch, P2, now48() + 20, false, 0);
+        (by, kind, under) = authorityOf(vm.getRecordedLogs(), address(channels), IAIFPChannelRegistry.ParadigmAdopted.selector);
+        assertTrue(by == address(exec) && kind == AIFPBasis.AUTHORITY_EXECUTOR && under == bytes32(0), "adoption by an executor");
+
+        vm.recordLogs();
+        bytes32 tb = declare(A, ch, transportBinding(1, bytes32("endpoint")));
+        (by, kind, under) = authorityOf(vm.getRecordedLogs(), address(channels), IAIFPChannelRegistry.BindingDeclared.selector);
+        assertTrue(by == A && kind == AIFPBasis.AUTHORITY_CHANNEL && under == bytes32(0), "declaration by the authority");
+
+        vm.recordLogs();
+        vm.prank(B);
+        channels.revokeBinding(ch, tb);
+        (by, kind, under) = authorityOf(vm.getRecordedLogs(), address(channels), IAIFPChannelRegistry.BindingRevoked.selector);
+        assertTrue(by == B && kind == AIFPBasis.AUTHORITY_ROLE && under == rulesBid, "revocation by a MANAGE_RULES holder");
+
+        vm.recordLogs();
+        vm.prank(C);
+        channels.recordDisclosure(ch, AIFPBindings.DISCLOSURE_DISCLOSED, bytes32("obj"), bytes32("aud"), 0);
+        (by, kind, under) = authorityOf(vm.getRecordedLogs(), address(channels), IAIFPChannelRegistry.DisclosureRecorded.selector);
+        assertTrue(by == C && kind == AIFPBasis.AUTHORITY_ROLE && under == discBid, "disclosure by a MANAGE_DISCLOSURE holder");
+
+        // The records written by openChannel name the opener as the authority of that moment.
+        vm.recordLogs();
+        vm.prank(O);
+        channels.openChannel(P1, A, bytes32(0), "ipfs://x", new IAIFPChannelRegistry.BindingDecl[](0));
+        (by, kind, under) = authorityOf(vm.getRecordedLogs(), address(channels), IAIFPChannelRegistry.ParadigmAdopted.selector);
+        assertTrue(by == O && kind == AIFPBasis.AUTHORITY_CHANNEL && under == bytes32(0), "opening adoption");
+    }
+
     function test_transfer_authority() public {
         vm.prank(O);
         vm.expectRevert(abi.encodeWithSelector(IAIFPChannelRegistry.AIFP_NotAuthorized.selector, ch, O));

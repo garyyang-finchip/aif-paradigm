@@ -429,3 +429,35 @@ calls: a manager grants a role, and the manager's `MANAGE_ADMISSION` binding is 
 those calls the evidence is the transaction (its sender, or its call trace when the caller is a contract) and
 the order of the logs. The alternative is one more event naming caller, basis and binding for every role-gated
 management call. Is the transaction enough for the audits you have in mind, or should the log carry it?
+
+## Reply on management events (eighth post; reply of 2026-11-10)
+
+The follow-up (eighth post): scenario 12 covers the case asked about. For management calls the authorization
+evidence should go into the existing event: when a smart wallet grants a role the transaction sender alone does
+not tell an auditor which account the registry authorized; `RoleGranted` could record the caller, the basis of
+the grant and the manager's `bindingId` when a role check was used, so that an indexer can check the grant
+against the role history in log order without a call trace.
+
+Reply:
+
+---
+
+@SergeevDmitry done, in the existing events. Every management event of both registries now ends with three
+fields: `by` (the caller), `authorityKind` (0 the channel authority, 1 a governance executor with the required
+effect, 2 a holder of the management role, 3 the subject of the binding acting for itself) and
+`authorizingBinding` (the manager's `bindingId` when the grounds are a role, zero otherwise). That covers
+`RoleGranted`, `RoleSuspended`, `RoleRevoked` and `RoleReadmitted` in the participation registry and
+`ParadigmAdopted`, `BindingDeclared`, `BindingRevoked` and `DisclosureRecorded` in the channel registry;
+`RoleReinstated` is unchanged, since its authority is the `RoleSuspended` log. The grounds are examined in the
+order of Sections 8.4 and 9.2, so an authority that also holds the role is reported as the authority.
+
+Section 10 now states the rule for management events in the same terms as for anchored records: the event is
+authorized if the binding it names belongs to the caller's subject and channel, covers the role and the scope,
+and is `SATISFIED` at the event's timepoint counting only the changes recorded before it in log order; for the
+authority and for an executor the grounds are the `AuthorityTransferred`, `ChannelOpened`, `BindingDeclared` and
+`BindingRevoked` logs before it. The smart-wallet case is exactly where this matters, and a test covers the
+same-block version of it: a manager grants a role and its `MANAGE_ADMISSION` binding is revoked later in the
+same block; the grant names that binding, and the `RoleGranted` log precedes the `RoleRevoked` log.
+
+The fields are appended, the existing ones keep their order, and events are not part of the ERC-165 identifiers,
+so no interface id changes. 229 tests. In the repository and in PR #2152.

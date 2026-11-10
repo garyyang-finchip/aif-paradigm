@@ -26,5 +26,5 @@ self-contained and reproduces the key vectors inline.
 
 **Discussion.** Ethereum Magicians thread: https://ethereum-magicians.org/t/erc-8489-agent-information-flow-paradigm/30300
 
-**Repository.** Reference repository with the Foundry suite (226 tests, 12 boundary cases), the canonical
+**Repository.** Reference repository with the Foundry suite (229 tests, 12 boundary cases), the canonical
 validator, the evidence scripts and the Sepolia evidence run: https://github.com/garyyang-finchip/aif-paradigm

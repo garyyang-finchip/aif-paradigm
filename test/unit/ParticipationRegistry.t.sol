@@ -611,11 +611,121 @@ contract ParticipationRegistryTest is Fixture {
 
     function test_events_on_grant_and_admit() public {
         vm.expectEmit(true, true, false, false);
-        emit IAIFPParticipationRegistry.RoleGranted(ch, subj(B), bytes32(0), 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        emit IAIFPParticipationRegistry.RoleGranted(ch, subj(B), bytes32(0), 0, 0, 0, 0, 0, 0, 0, 0, 0, address(0), 0, 0);
         grantRoles(A, ch, B, AIFPRoles.OBSERVE, 0);
         vm.expectEmit(true, true, false, true);
         emit IAIFPParticipationRegistry.AdmissionEvaluated(ch, subj(B), AIFPRoles.SUBMIT, SCOPE_X, S);
         vm.prank(B);
         participation.admit(ch, AIFPRoles.SUBMIT, SCOPE_X, openPredicate(), noEvidence(), 0);
+    }
+
+    // ------------------------------------------------------------ the management events name their authority
+
+    /// @dev Last three data words of the first log with `topic0` from `emitter`: by, authorityKind, binding.
+    function authorityOf(Vm.Log[] memory logs, address emitter, bytes32 topic0) internal pure returns (address by, uint8 kind, bytes32 under) {
+        for (uint256 i = 0; i < logs.length; i++) {
+            if (logs[i].emitter != emitter || logs[i].topics[0] != topic0) continue;
+            bytes memory d = logs[i].data;
+            uint256 n = d.length;
+            assembly ("memory-safe") {
+                by := mload(add(add(d, 0x20), sub(n, 0x60)))
+                kind := mload(add(add(d, 0x20), sub(n, 0x40)))
+                under := mload(add(add(d, 0x20), sub(n, 0x20)))
+            }
+            return (by, kind, under);
+        }
+        revert("log not found");
+    }
+
+    /// @dev Last three data words as (uint48, uint8, bytes32): for RoleSuspended and RoleRevoked these are
+    ///      at, authorityKind and authorizingBinding (the caller is an indexed topic there).
+    function lastThree(Vm.Log[] memory logs, address emitter, bytes32 topic0) internal pure returns (uint48 a, uint8 kind, bytes32 under) {
+        for (uint256 i = 0; i < logs.length; i++) {
+            if (logs[i].emitter != emitter || logs[i].topics[0] != topic0) continue;
+            bytes memory d = logs[i].data;
+            uint256 n = d.length;
+            assembly ("memory-safe") {
+                a := mload(add(add(d, 0x20), sub(n, 0x60)))
+                kind := mload(add(add(d, 0x20), sub(n, 0x40)))
+                under := mload(add(add(d, 0x20), sub(n, 0x20)))
+            }
+            return (a, kind, under);
+        }
+        revert("log not found");
+    }
+
+    /// @dev A grant by the authority, by an executor and by a MANAGE_ADMISSION holder: the event says which,
+    ///      and names the manager's binding so that a reader of the log can check it against the role history
+    ///      in log order (asked on the ERC-8489 thread: a smart wallet's transaction sender alone does not say
+    ///      which account the registry authorized).
+    function test_grant_event_names_caller_authority_kind_and_binding() public {
+        bytes32 managerBid = grantRoles(A, ch, C, AIFPRoles.MANAGE_ADMISSION, 0);
+        MockExecutor exec = new MockExecutor(channels, participation);
+        declare(A, ch, governanceBinding(AIFPBindings.KIND_GOVERNANCE_RULES, address(exec), AIFPBindings.EFFECT_PARTICIPATION, AIFPBindings.ADOPTION_AUTOMATIC));
+        bytes32 sel = IAIFPParticipationRegistry.RoleGranted.selector;
+
+        vm.recordLogs();
+        grantRoles(A, ch, B, AIFPRoles.OBSERVE, 0);
+        (address by, uint8 kind, bytes32 under) = authorityOf(vm.getRecordedLogs(), address(participation), sel);
+        assertEq(by, A);
+        assertEq(uint256(kind), uint256(AIFPBasis.AUTHORITY_CHANNEL));
+        assertEq(under, bytes32(0));
+
+        vm.recordLogs();
+        exec.grant(ch, subj(B), AIFPRoles.OBSERVE, 0);
+        (by, kind, under) = authorityOf(vm.getRecordedLogs(), address(participation), sel);
+        assertEq(by, address(exec));
+        assertEq(uint256(kind), uint256(AIFPBasis.AUTHORITY_EXECUTOR));
+        assertEq(under, bytes32(0));
+
+        vm.recordLogs();
+        bytes32 granted = grantRoles(C, ch, B, AIFPRoles.OBSERVE, 0);
+        (by, kind, under) = authorityOf(vm.getRecordedLogs(), address(participation), sel);
+        assertEq(by, C);
+        assertEq(uint256(kind), uint256(AIFPBasis.AUTHORITY_ROLE));
+        assertEq(under, managerBid, "the manager's own binding is named");
+
+        // Suspension and revocation by the manager name the same binding (their caller is an indexed topic, so
+        // the last three data words are at, kind, binding); an admission names the subject.
+        vm.recordLogs();
+        vm.prank(C);
+        participation.suspend(granted, bytes32("hold"));
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        (uint48 at_, uint8 k2, bytes32 u2) = lastThree(logs, address(participation), IAIFPParticipationRegistry.RoleSuspended.selector);
+        assertTrue(at_ == now48() && k2 == AIFPBasis.AUTHORITY_ROLE && u2 == managerBid, "suspend");
+        vm.recordLogs();
+        vm.prank(C);
+        participation.revoke(granted, bytes32("end"));
+        (at_, k2, u2) = lastThree(vm.getRecordedLogs(), address(participation), IAIFPParticipationRegistry.RoleRevoked.selector);
+        assertTrue(at_ == now48() && k2 == AIFPBasis.AUTHORITY_ROLE && u2 == managerBid, "revoke");
+        vm.recordLogs();
+        vm.prank(B);
+        participation.admit(ch, AIFPRoles.SUBMIT, SCOPE_X, openPredicate(), noEvidence(), 0);
+        (by, kind, under) = authorityOf(vm.getRecordedLogs(), address(participation), sel);
+        assertTrue(by == B && kind == AIFPBasis.AUTHORITY_SUBJECT && under == bytes32(0), "admit");
+    }
+
+    /// @dev The manager's binding named in a grant is the one that satisfied the check at that position: a
+    ///      grant made at t, followed by the revocation of the manager's binding at t, is authorized by the
+    ///      log order although a read at t no longer shows the manager as holding the role.
+    function test_manager_binding_named_in_a_grant_survives_its_revocation_in_the_same_timepoint() public {
+        bytes32 managerBid = grantRoles(A, ch, C, AIFPRoles.MANAGE_ADMISSION, 0);
+        warpBy(5);
+        vm.recordLogs();
+        grantRoles(C, ch, B, AIFPRoles.OBSERVE, 0);
+        vm.prank(A);
+        participation.revoke(managerBid, bytes32("end"));
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        (, uint8 kind, bytes32 under) = authorityOf(logs, address(participation), IAIFPParticipationRegistry.RoleGranted.selector);
+        assertTrue(kind == AIFPBasis.AUTHORITY_ROLE && under == managerBid);
+        assertOutcome(evalNow(ch, C, AIFPRoles.MANAGE_ADMISSION, 0), N, "the read at t no longer shows it");
+        uint256 grantedAt;
+        uint256 revokedAt;
+        for (uint256 i = 0; i < logs.length; i++) {
+            if (logs[i].emitter != address(participation)) continue;
+            if (logs[i].topics[0] == IAIFPParticipationRegistry.RoleGranted.selector) grantedAt = i;
+            if (logs[i].topics[0] == IAIFPParticipationRegistry.RoleRevoked.selector) revokedAt = i;
+        }
+        assertTrue(grantedAt < revokedAt, "the grant precedes the revocation of its authority");
     }
 }

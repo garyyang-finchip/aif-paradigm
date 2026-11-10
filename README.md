@@ -23,11 +23,11 @@ for the term-by-term mapping.
 - Sepolia runbook: [`docs/sepolia-runbook.md`](docs/sepolia-runbook.md)
 
 Status: v0.1.3 - number ERC-8489 assigned by the editors on 2026-11-09; draft text, reference contracts,
-226 Foundry tests, validator and vectors complete. v0.1.2 and v0.1.3 are review rounds from the Magicians thread
+229 Foundry tests, validator and vectors complete. v0.1.2 and v0.1.3 are review rounds from the Magicians thread
 (see `docs/design-memo.md`, section 8): leaf answers are judged by their raw return data and never copied beyond
 one word; every leaf that is called is given a fixed gas bound in full, or the evaluation fails without an
 outcome; a failed evaluation is never reported as `VERIFIER_ERROR`; the predicate array has to be a tree of
-bounded depth and a decided composite stops evaluating; event records name the role binding that authorized
+bounded depth and a decided composite stops evaluating; event records and management events name the role binding that authorized
 them; an objection window confirms its integrity instead of presuming it. Ethereum
 Magicians thread
 [ERC-8489: Agent Information Flow Paradigm](https://ethereum-magicians.org/t/erc-8489-agent-information-flow-paradigm/30300)
@@ -101,7 +101,7 @@ Foundry (forge 1.x, solc 0.8.28) and Node 22.
 
 ```
 forge build
-forge test                                   # 226 tests, 27 suites; no `forge install` needed
+forge test                                   # 229 tests, 27 suites; no `forge install` needed
 npm ci && npm run check                      # validates every example, rejects the invalid ones, regenerates vectors
 node tools/descriptor-validate.mjs assets/erc-aifp/examples/paradigms/panel.json --brief
 python3 tools/make-filing-package.py          # ercs-pr-package/ERCS/erc-8489.md + assets/erc-8489/, linted
