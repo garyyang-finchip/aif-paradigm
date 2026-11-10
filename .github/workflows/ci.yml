@@ -18,8 +18,12 @@ jobs:
         uses: foundry-rs/foundry-toolchain@v1
         with:
           version: stable
+      # Scripts and tests are never deployed: script/Deploy.s.sol embeds the creation code of the whole stack
+      # and is far above the EIP-170 limit, which makes a plain `forge build --sizes` exit with an error.
+      - name: Contract sizes (reference contracts only)
+        run: forge build --sizes --skip test --skip script
       - name: Build
-        run: forge build --sizes
+        run: forge build
       - name: Test
         run: forge test -vvv
       - name: Upload ABI artifacts for the tooling job
@@ -63,7 +67,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Lint the ERC text and build the placeholder package
+      - name: Lint the ERC text and build the ERC-8489 filing package
         run: |
           if [ -f ERCS/erc-aifp.md ]; then
             python3 tools/make-filing-package.py --out /tmp/ercs-pr-package
