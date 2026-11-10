@@ -130,6 +130,65 @@ contract ParticipationRegistryTest is Fixture {
         participation.admit(ch, AIFPRoles.SUBMIT, 0, openPredicate(), noEvidence(), 0);
     }
 
+    /// @dev Re-admission is an admission: a frozen channel accepts neither `readmit` nor
+    ///      `confirmReadmission`, while suspension, reinstatement and revocation keep working.
+    function test_readmission_requires_active_channel() public {
+        bytes32 managerBid = grantRoles(A, ch, B, AIFPRoles.SUBMIT, 0);
+        bytes32 spare = grantRoles(A, ch, B, AIFPRoles.OBSERVE, 0);
+        vm.prank(C);
+        bytes32 predBid = participation.admit(ch, AIFPRoles.SUBMIT, 0, openPredicate(), noEvidence(), 0);
+        bytes32 P2 = successorParadigm(A, "fam", "aifp:paradigm/club/v1", P1, "2", onePred(AIFPRoles.SUBMIT, openPredicate()));
+        vm.prank(A);
+        channels.adoptParadigm(ch, P2, now48() + 100, true, bytes32("vote"));
+        warpBy(100);
+        bytes memory notActive = abi.encodeWithSelector(IAIFPParticipationRegistry.AIFP_ChannelNotActive.selector, ch);
+        vm.prank(A);
+        channels.setState(ch, IAIFPChannelRegistry.ChannelState.Frozen);
+        // The adoption took effect although the channel is frozen: both bindings are pending.
+        assertOutcome(evalNow(ch, B, AIFPRoles.SUBMIT, 0), U, "pending");
+        vm.prank(A);
+        vm.expectRevert(notActive);
+        participation.confirmReadmission(managerBid);
+        vm.prank(C);
+        vm.expectRevert(notActive);
+        participation.readmit(predBid, openPredicate(), noEvidence());
+        // What reduces or restores an existing binding still works.
+        vm.prank(A);
+        participation.suspend(managerBid, bytes32("hold"));
+        vm.prank(A);
+        participation.reinstate(managerBid);
+        vm.prank(A);
+        participation.revoke(spare, bytes32("end"));
+        // Once the channel is active again both re-admissions go through.
+        vm.prank(A);
+        channels.setState(ch, IAIFPChannelRegistry.ChannelState.Active);
+        vm.prank(A);
+        participation.confirmReadmission(managerBid);
+        vm.prank(C);
+        participation.readmit(predBid, openPredicate(), noEvidence());
+        assertOutcome(evalNow(ch, B, AIFPRoles.SUBMIT, 0), S, "confirmed");
+        assertOutcome(evalNow(ch, C, AIFPRoles.SUBMIT, 0), S, "re-admitted");
+        // A closed channel accepts neither, for good.
+        bytes32 P3 = successorParadigm(A, "fam", "aifp:paradigm/club/v1", P2, "3", onePred(AIFPRoles.SUBMIT, openPredicate()));
+        vm.prank(A);
+        channels.adoptParadigm(ch, P3, now48() + 50, true, bytes32("vote"));
+        vm.prank(A);
+        channels.setState(ch, IAIFPChannelRegistry.ChannelState.Closed);
+        assertOutcome(evalNow(ch, B, AIFPRoles.SUBMIT, 0), S, "closing changes no binding");
+        warpBy(50);
+        // An adoption recorded while the channel was active comes into force whatever its state is by then.
+        assertEq(channels.paradigmAt(ch, now48()), P3, "in force in a closed channel");
+        assertOutcome(evalNow(ch, B, AIFPRoles.SUBMIT, 0), U, "and its re-admission requirement with it");
+        vm.prank(A);
+        vm.expectRevert(notActive);
+        participation.confirmReadmission(managerBid);
+        vm.prank(C);
+        vm.expectRevert(notActive);
+        participation.readmit(predBid, openPredicate(), noEvidence());
+        vm.prank(A);
+        participation.revoke(managerBid, bytes32("end"));
+    }
+
     function test_max_bindings_per_subject() public {
         for (uint256 i = 0; i < participation.MAX_BINDINGS_PER_SUBJECT(); i++) {
             grantRoles(A, ch, B, AIFPRoles.OBSERVE, bytes32(i + 1));
@@ -207,11 +266,39 @@ contract ParticipationRegistryTest is Fixture {
 
     function test_preview_admission() public {
         assertOutcome(participation.previewAdmission(ch, subj(B), AIFPRoles.SUBMIT, 0, openPredicate(), noEvidence()), S, "open");
-        assertOutcome(participation.previewAdmission(ch, subj(B), AIFPRoles.OBSERVE, 0, openPredicate(), noEvidence()), N, "no predicate for role");
         mock.setFixed(U);
         assertOutcome(participation.previewAdmission(ch, subj(B), AIFPRoles.RESPOND, 0, extPred, noEvidence()), U, "undeterminable passes through");
         vm.expectRevert(abi.encodeWithSelector(IAIFPParticipationRegistry.AIFP_PredicateMismatch.selector, keccak256(openPredicate()), keccak256(extPred)));
         participation.previewAdmission(ch, subj(B), AIFPRoles.SUBMIT, 0, extPred, noEvidence());
+    }
+
+    /// @dev A preview reverts where an admission would be rejected, with the same error: it reports an
+    ///      outcome only when the composite verifier returned one. In particular a role that the paradigm
+    ///      gives no predicate is not reported as NOT_SATISFIED - nothing was evaluated.
+    function test_preview_rejects_what_admit_rejects() public {
+        bytes memory noPredicate = abi.encodeWithSelector(IAIFPParticipationRegistry.AIFP_NoPredicateForRole.selector, P1, uint16(AIFPRoles.OBSERVE));
+        vm.expectRevert(noPredicate);
+        participation.previewAdmission(ch, subj(B), AIFPRoles.OBSERVE, 0, openPredicate(), noEvidence());
+        vm.prank(B);
+        vm.expectRevert(noPredicate);
+        participation.admit(ch, AIFPRoles.OBSERVE, 0, openPredicate(), noEvidence(), 0);
+
+        bytes memory twoRoles = abi.encodeWithSelector(IAIFPParticipationRegistry.AIFP_InvalidRole.selector, uint16(AIFPRoles.SUBMIT | AIFPRoles.RESPOND));
+        vm.expectRevert(twoRoles);
+        participation.previewAdmission(ch, subj(B), AIFPRoles.SUBMIT | AIFPRoles.RESPOND, 0, openPredicate(), noEvidence());
+
+        bytes memory notActive = abi.encodeWithSelector(IAIFPParticipationRegistry.AIFP_ChannelNotActive.selector, ch);
+        vm.prank(A);
+        channels.setState(ch, IAIFPChannelRegistry.ChannelState.Frozen);
+        vm.expectRevert(notActive);
+        participation.previewAdmission(ch, subj(B), AIFPRoles.SUBMIT, 0, openPredicate(), noEvidence());
+        vm.prank(A);
+        channels.setState(ch, IAIFPChannelRegistry.ChannelState.Active);
+        assertOutcome(participation.previewAdmission(ch, subj(B), AIFPRoles.SUBMIT, 0, openPredicate(), noEvidence()), S, "active again");
+        vm.prank(A);
+        channels.setState(ch, IAIFPChannelRegistry.ChannelState.Closed);
+        vm.expectRevert(notActive);
+        participation.previewAdmission(ch, subj(B), AIFPRoles.SUBMIT, 0, openPredicate(), noEvidence());
     }
 
     // ------------------------------------------------------------ suspend / reinstate / revoke
@@ -339,6 +426,32 @@ contract ParticipationRegistryTest is Fixture {
         assertFalse(participation.isPending(managerBid, T0));
     }
 
+    /// @dev What decides is whether the adoption was already in effect when the binding was granted, not
+    ///      whether it was already recorded: a binding granted while the adoption is still scheduled becomes
+    ///      pending at its effective timepoint like every earlier one. Otherwise a subject could be admitted
+    ///      under the old rules a moment before the change and skip the re-admission it requires.
+    function test_binding_granted_while_an_adoption_is_scheduled_is_pending_from_its_effective_timepoint() public {
+        bytes32 before = grantRoles(A, ch, B, AIFPRoles.SUBMIT, 0);
+        _adoptWithReadmission(); // recorded at T0, effective at T0 + 100
+        warpBy(10);
+        bytes32 between = grantRoles(A, ch, C, AIFPRoles.SUBMIT, 0);
+        assertEq(uint256(participation.bindingOf(between).admittedEpoch), 0, "the adoption is not in effect yet");
+        assertOutcome(evalNow(ch, C, AIFPRoles.SUBMIT, 0), S, "valid until the change");
+        // A grant whose validity starts at the effective timepoint is recorded now, under the epoch of now.
+        vm.prank(A);
+        bytes32 future = participation.grant(ch, subj(O), 0, AIFPRoles.SUBMIT, 0, AIFPBasis.MANAGER_GRANT, 0, T0 + 100, 0);
+        warpBy(90);
+        assertOutcome(evalAt(ch, C, AIFPRoles.SUBMIT, 0, T0 + 99), S, "the last timepoint under the old rules");
+        assertOutcome(evalNow(ch, B, AIFPRoles.SUBMIT, 0), U, "granted before the adoption was recorded");
+        assertOutcome(evalNow(ch, C, AIFPRoles.SUBMIT, 0), U, "granted while it was scheduled");
+        assertOutcome(evalNow(ch, O, AIFPRoles.SUBMIT, 0), U, "granted while it was scheduled, valid from its effective timepoint");
+        assertTrue(participation.isPending(before, now48()) && participation.isPending(between, now48()) && participation.isPending(future, now48()));
+        // A binding granted once the adoption is in effect is not pending.
+        bytes32 after_ = grantRoles(A, ch, A, AIFPRoles.SUBMIT, 0);
+        assertEq(uint256(participation.bindingOf(after_).admittedEpoch), 1);
+        assertOutcome(evalNow(ch, A, AIFPRoles.SUBMIT, 0), S, "granted at the effective timepoint, after the adoption");
+    }
+
     function test_confirm_readmission_for_manager_bindings() public {
         bytes32 managerBid = grantRoles(A, ch, B, AIFPRoles.SUBMIT, 0);
         bytes32 P2 = _adoptWithReadmission();
@@ -357,7 +470,8 @@ contract ParticipationRegistryTest is Fixture {
         vm.prank(A);
         vm.expectRevert(abi.encodeWithSelector(IAIFPParticipationRegistry.AIFP_NotPending.selector, managerBid));
         participation.confirmReadmission(managerBid);
-        // the pending window is visible in history
+        // The confirmation was recorded at the adoption's own effective timepoint, so no timepoint reads as
+        // pending: the pending state lasted for part of T0+100 only and shows in the logs, not in a read.
         assertOutcome(evalAt(ch, B, AIFPRoles.SUBMIT, 0, T0 + 100), S, "readmitted at T0+100");
         assertOutcome(evalAt(ch, B, AIFPRoles.SUBMIT, 0, T0 + 50), S, "before change");
     }

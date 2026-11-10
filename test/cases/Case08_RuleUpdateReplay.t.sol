@@ -68,7 +68,7 @@ contract Case08_RuleUpdateReplay is CaseBase {
         assertOutcome(evalAt(ch, B, AIFPRoles.SUBMIT, 0, tRevoke), N, "at revocation");
         assertOutcome(evalNow(ch, B, AIFPRoles.SUBMIT, 0), N, "now");
         vm.prank(B);
-        vm.expectRevert(abi.encodeWithSelector(IAIFPEventAnchor.AIFP_RoleNotHeld.selector, ch, subj(B), uint16(AIFPRoles.SUBMIT)));
+        vm.expectRevert(abi.encodeWithSelector(IAIFPEventAnchor.AIFP_RoleNotHeld.selector, ch, subj(B), uint16(AIFPRoles.SUBMIT), AIFPOutcomes.NOT_SATISFIED));
         anchor.anchor(ch, AIFPEvents.ACTION_PUBLISH, bytes32("post-after-revocation"), noRel());
     }
 

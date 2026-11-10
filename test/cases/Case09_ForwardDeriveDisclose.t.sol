@@ -29,9 +29,11 @@ contract Case09_ForwardDeriveDisclose is CaseBase {
     function test_forward_keeps_reference_and_needs_redistribute() public {
         bytes32 post = keccak256("A: we should ship in Q1");
         anchorAs(A, room, AIFPEvents.ACTION_PUBLISH, post, noRel());
-        // A has no REDISTRIBUTE in the room: A cannot carry its own post outside.
+        // A holds no REDISTRIBUTE in the bulletin: the anchor checks the role in the channel named in the call,
+        // the one that receives the record, so A cannot bring its own post there. (The anchor does not
+        // consult the room, where the post was first anchored.)
         vm.prank(A);
-        vm.expectRevert(abi.encodeWithSelector(IAIFPEventAnchor.AIFP_RoleNotHeld.selector, bulletin, subj(A), uint16(AIFPRoles.REDISTRIBUTE)));
+        vm.expectRevert(abi.encodeWithSelector(IAIFPEventAnchor.AIFP_RoleNotHeld.selector, bulletin, subj(A), uint16(AIFPRoles.REDISTRIBUTE), AIFPOutcomes.NOT_SATISFIED));
         anchor.anchor(bulletin, AIFPEvents.ACTION_FORWARD, post, rel(AIFPEvents.REL_FORWARDS, post));
         // B may: the forwarded object keeps its reference and its original author.
         uint256 idx = anchorAs(B, bulletin, AIFPEvents.ACTION_FORWARD, post, rel(AIFPEvents.REL_FORWARDS, post));

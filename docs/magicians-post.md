@@ -284,3 +284,148 @@ think the bound belongs in the node (or that 1,000,000 is the wrong default), I 
 
 The Sepolia record notes that the deployed verifier is the v0.1.1 build and that the recorded cases do not
 exercise malformed leaf return data; it will be redeployed with the next evidence run.
+
+## Reply to the follow-up on the leaf call (fourth post; reply of 2026-11-10)
+
+The follow-up (fourth post in the thread) agreed with keeping the bound in the verifier and made three points.
+Section 6.3 should say that a leaf needing more than the bound is always `VERIFIER_ERROR`: 1,000,000 gas covers a
+Groth16 check and not an on-chain STARK verifier. At 594c7ee a caller with less than about 64/63 of the bound left
+gave the leaf less than the bound, so the same leaf could pass in `previewAdmission` over `eth_call` and come back
+`VERIFIER_ERROR` in an `admit` sent with a tight gas limit; the suggestion was to revert when
+`gasleft() < LEAF_GAS_LIMIT / 63` after the call, as OpenZeppelin's ERC2771Forwarder does. And
+`(bool success, bytes memory ret)` copied all of the return data into the verifier's memory, a cost the bound did
+not cover (about 700 KB fit in a leaf's million, and copying them cost the verifier about as much again); the
+suggestion was to copy at most 32 bytes in assembly.
+
+Reply:
+
+---
+
+@Zealynx agreed on all three; on the second the fix went further than the one you proposed. This is v0.1.3 of
+the reference, in the repository and in PR #2152.
+
+**1. A leaf that needs more than the bound.** Section 6.3 now says so: a leaf call that does not complete within
+the bound is `VERIFIER_ERROR` for that leaf however much gas the caller supplies, and a paradigm whose leaf
+needs more has to be evaluated by a composite verifier with a higher bound. The bound is a fixed amount (MUST;
+it was "SHOULD be bounded") and the verifier reports it through `leafGasLimit()`, so it can be read before a
+paradigm names a heavy verifier. The text calls 1,000,000 a property of the reference implementation: ample for
+a pairing-based proof check, too small for a verifier that needs several million gas.
+
+**2. The starved leaf.** Right: at 594c7ee a leaf could receive less than the bound, and `previewAdmission` and
+a tight `admit` could disagree. I first implemented your check (revert when `gasleft() < LEAF_GAS_LIMIT / 63`
+after the call). It catches a starved leaf that burns everything it is given. It misses a starved leaf that
+still returns, because that leaf leaves gas behind: a probe that branches on `gasleft()`, and one that catches
+an out-of-gas in an inner call and answers `UNDETERMINABLE` (what a verifier querying a registry inside
+`try/catch` does), both returned outcomes that differ from the fully funded answer.
+
+So the draft now requires that **the gas supplied to an evaluation MUST NOT decide its outcome.** The verifier
+checks before each leaf call that the full bound can be forwarded (`gasleft() >= bound + bound / 63 + 1 +
+margin`) and otherwise reverts the whole evaluation with `AIFP_InsufficientGas()`; every leaf that is called
+receives exactly the bound. The registry no longer turns a reverted evaluation into `VERIFIER_ERROR`: it reports
+an outcome only when the verifier returned one outcome word and reverts otherwise. An `admit` with too little
+gas fails; it does not answer differently from its preview.
+
+**3. The return data copy.** Adopted as you wrote it: `AIFPCalls.staticcallWord` reads `returndatasize()` and
+copies at most 32 bytes, and the registry reads the verifier's answer the same way. A test compares a leaf
+returning 600,000 bytes with one returning 64: the difference in the cost of the evaluation is the leaf's own
+cost of producing the buffer.
+
+Going through the leaf call again turned up three more things:
+
+- The node array did not have to be a tree: two composites could name the same child, each path was evaluated,
+  and 22 nodes could call one leaf 1,024 times. Section 6.1 always said "tree"; it is now enforced, so a
+  predicate has at most 63 leaves and each is called at most once.
+- A decided composite stops: `anyOf` at its first `SATISFIED` child, `allOf` at its first `NOT_SATISFIED` child
+  (index order is a MUST, stopping a SHOULD). Outcomes are unchanged, and in the scenario of your first post the
+  subject on the allowlist no longer pays for the broken external verifier. The depth limit moved into the
+  well-formedness check for that reason: checked while descending, it would miss a branch that is skipped, and
+  the same predicate would be an outcome for one subject and malformed for another.
+- What the bound does not fix, in two parts. Under EIP-2929 the gas a leaf needs depends on what the transaction
+  has already touched (access list, earlier calls, sibling leaves), so a leaf close to the bound can still be
+  `VERIFIER_ERROR` in a preview and answer in the admission. And the gas limit reaches a leaf that reads the
+  sender's native balance, because the sender is charged gas limit times gas price before execution. I found no
+  way to remove either in the composite verifier; Section 6.3 names both and asks leaf verifiers to fit the
+  bound from a cold start and not to read the sender's balance.
+
+The price of checking before the call is headroom: each leaf call needs about 64/63 of the bound available at
+that moment, whatever the leaf will use, so an admission that calls even one cheap leaf needs a gas limit above
+1,000,000 (the unused part is not spent, and a simulated estimate includes it). A leaf that burns its gas still
+costs the whole bound each time it is called; the Security Considerations give the worst case as the number of
+leaves that can be called times the bound.
+
+Tests: 226 pass (163 before). `test/unit/LeafGas.t.sol` scans the funding point gas by gas with a raw-bytecode
+leaf that shows it is given exactly the bound, for `verify` and for `contains`, and fuzzes the caller's gas.
+Twenty-five mutated contracts (a 150 gas margin, 900 gas too many forwarded, the check moved after the call, a 4
+KB copy, a registry accepting any answer size, and so on) each fail at least one test. `leafGasLimit()` changes
+the interface identifier of `IAIFPCompositeVerifier` to `0xe3fe3554`; predicate encoding and hashes are
+unchanged. The same revision carries fixes from a review of my own that are not about the leaf call (admission
+previews, re-admission in frozen channels, the objection-window companion); section 8 of `docs/design-memo.md`
+lists them, with what was noted and left for the next round. Sepolia still runs the v0.1.1 build and will be
+redeployed once this revision has been looked at.
+
+Does the check before the call hold up for you, and do you see a way around either of the two dependences that I
+missed?
+
+## Reply on decisions within one block (fifth post; reply of 2026-11-10)
+
+The question (fifth post in the thread): a channel accepts a contribution and the contributor's role is revoked
+later in the same block, so both transactions carry the same timestamp. What does `evaluate` return for that
+timestamp, and if it reports the role as revoked by the end of the block, what does an auditor use to verify that
+the contributor was authorized when the contribution was accepted?
+
+Reply:
+
+---
+
+@SergeevDmitry both questions have a definite answer, and the second exposed a gap: at 594c7ee the anchored
+record did not say which binding it had relied on. v0.1.3 of the reference (in the repository and in PR #2152)
+closes it.
+
+**What `evaluate` returns.** Once the revocation is recorded, `evaluate(..., t)` is `NOT_SATISFIED`, unless the
+contributor holds another binding for the role. A revocation at `t` excludes `t` from the binding's interval,
+and changes recorded at one timepoint apply in transaction order (Section 4). A read made between the two
+transactions returned `SATISFIED`; once the clock has passed `t` the read for `t` is final.
+
+**What the auditor uses.** The record written when the contribution was accepted, not a later re-evaluation:
+
+- `evaluateWithBinding(...)` on the participation registry returns the outcome and, when it is `SATISFIED`, a
+  binding that satisfies the check.
+- The event anchor stores and emits that binding: `EventRecord` and `EventAnchored` now end with `bindingId`,
+  next to the `ruleVersion` and `at` they already carried. The objection-window companion names the binding in
+  its events too.
+- Section 10 states the audit rule. A record is authorized if the binding it names belongs to the record's
+  subject and channel, covers the role and scope the action needs, and is applicable and `SATISFIED` at the
+  record's timepoint when only the changes recorded before the record are counted. Within the record's own
+  timepoint, "before" is the order of the logs in the chain: block number, transaction index, log index.
+
+In your scenario the auditor finds `EventAnchored(..., at = t, bindingId = x)` followed by `RoleRevoked(x, at =
+t)`: the acceptance was authorized, and a second contribution by the same subject later at `t` is refused. This
+is evaluation scenario 12 in the draft and `test/unit/DecisionEvidence.t.sol` in the repository.
+
+**Why the boundary stays.** Letting a revocation at `t` take effect at `t + 1` would make the read agree with
+the record, but a revoked binding would stay usable for the rest of the timepoint, also by transactions that
+follow the revocation in the same block. I prefer a read that fails closed and evidence that sits in the record.
+Moving the boundary would not make the read sufficient anyway, because it errs in the other direction too: a
+binding granted, or suspended and reinstated, later within `t` reads as `SATISFIED` although an action attempted
+before that was refused, and a binding granted, used and revoked within one block does not read as held at any
+timepoint. The Security Considerations list these cases under "Reads within a timepoint".
+
+Limits, stated in the text: `bindingId` is a witness that the role was held (the earliest-created binding that
+satisfies the check), not a statement about the capacity in which the subject acted; a contract cannot apply the
+audit rule on chain and relies on the recorder, the full verification being a replay of the registries' events
+with the clock values of their blocks; and a transport that accepts off chain has no position in the chain, so
+it records the block whose state it read together with the binding.
+
+For implementers: `evaluateWithBinding` changes the interface identifier of `IAIFPParticipationRegistry` to
+`0x1d84a105`; `EventRecord` and `EventAnchored` gain `bindingId` as their last member, the existing members keep
+their order; a refused anchor reports the outcome of the role check, so a binding pending re-admission is not
+reported like a missing one. Checking the rule-version half of the same evidence I also found and fixed a bug in
+`paradigmAt`: with adoptions recorded out of effective order it kept the last one recorded instead of the one
+with the latest effective timepoint (scenario 14).
+
+One thing I left alone and would like your view on. The same question applies to the registries' own management
+calls: a manager grants a role, and the manager's `MANAGE_ADMISSION` binding is revoked later in the same block.
+`RoleGranted` names neither the caller nor the binding that authorized the caller. Section 10 now says that for
+those calls the evidence is the transaction (its sender, or its call trace when the caller is a contract) and
+the order of the logs. The alternative is one more event naming caller, basis and binding for every role-gated
+management call. Is the transaction enough for the audits you have in mind, or should the log carry it?

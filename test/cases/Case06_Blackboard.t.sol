@@ -54,7 +54,7 @@ contract Case06_Blackboard is CaseBase {
         bytes32 v1 = keccak256(abi.encode(PLAN, 1));
         anchorAs(A, board, AIFPEvents.ACTION_PUBLISH, v1, noRel());
         vm.prank(O);
-        vm.expectRevert(abi.encodeWithSelector(IAIFPEventAnchor.AIFP_RoleNotHeld.selector, board, subj(O), uint16(AIFPRoles.MODIFY)));
+        vm.expectRevert(abi.encodeWithSelector(IAIFPEventAnchor.AIFP_RoleNotHeld.selector, board, subj(O), uint16(AIFPRoles.MODIFY), AIFPOutcomes.NOT_SATISFIED));
         anchor.anchor(board, AIFPEvents.ACTION_MODIFY, keccak256("rogue"), rel(AIFPEvents.REL_SUPERSEDES, v1));
         // Retraction of the current head is reserved to its author.
         bytes32 v2 = keccak256(abi.encode(PLAN, 2));

@@ -58,11 +58,12 @@ contract Case11_ObjectionWindow is CaseBase {
         vm.warp(start + 1 days);
         vm.prank(A);
         channels.setState(ch, IAIFPChannelRegistry.ChannelState.Frozen);
-        // Anyone can record that objections could not be registered for part of the window.
-        vm.prank(O);
-        win.reportIntegrityBreak(id);
+        // Nobody has to report it: the window records the channel's count of state changes when it opens,
+        // and a count that has moved by the time it is resolved leaves its integrity unconfirmed.
+        vm.warp(start + 2 days);
         vm.prank(A);
         channels.setState(ch, IAIFPChannelRegistry.ChannelState.Active);
+        assertFalse(win.integrityHolds(id), "active again, and the window is not whole again");
         vm.warp(deadline);
         assertEq(uint256(win.resolve(id)), uint256(win.STATUS_UNDETERMINABLE()), "silence in a broken window proves nothing");
     }

@@ -142,6 +142,23 @@ contract ChannelRegistryTest is Fixture {
         channels.revokeBinding(ch, bid);
     }
 
+    /// @dev A frozen channel can still lose an executor; a closed one accepts no change to its bindings.
+    function test_revokeBinding_is_accepted_in_a_frozen_channel_and_not_in_a_closed_one() public {
+        MockExecutor exec = new MockExecutor(channels, participation);
+        bytes32 first = declare(A, ch, governanceBinding(AIFPBindings.KIND_GOVERNANCE_RULES, address(exec), AIFPBindings.EFFECT_RULES, AIFPBindings.ADOPTION_AUTOMATIC));
+        bytes32 second = declare(A, ch, transportBinding(1, bytes32("endpoint")));
+        vm.prank(A);
+        channels.setState(ch, IAIFPChannelRegistry.ChannelState.Frozen);
+        vm.prank(A);
+        channels.revokeBinding(ch, first);
+        assertFalse(channels.isGovernanceExecutor(ch, address(exec), AIFPBindings.EFFECT_RULES));
+        vm.prank(A);
+        channels.setState(ch, IAIFPChannelRegistry.ChannelState.Closed);
+        vm.prank(A);
+        vm.expectRevert(abi.encodeWithSelector(IAIFPChannelRegistry.AIFP_ChannelClosed.selector, ch));
+        channels.revokeBinding(ch, second);
+    }
+
     function test_paradigmAt_before_first_adoption_is_zero_and_ties_resolve_to_later_record() public {
         assertEq(channels.paradigmAt(ch, T0 - 1), bytes32(0));
         uint48 eff = now48() + 50;
@@ -151,6 +168,39 @@ contract ChannelRegistryTest is Fixture {
         channels.adoptParadigm(ch, P1, eff, false, 0); // same effectiveAt, recorded later
         assertEq(channels.paradigmAt(ch, eff), P1, "later-recorded adoption wins the tie");
         assertEq(channels.paradigmAt(ch, eff + 1000), P1);
+    }
+
+    /// @dev Adoptions can be recorded out of effective order: the later one is scheduled first. The paradigm
+    ///      in force is the one with the latest effective timepoint, not the one recorded last.
+    function test_paradigmAt_follows_effective_order_when_adoptions_are_recorded_out_of_order() public {
+        bytes32 P3 = successorParadigm(A, "fam", "aifp:paradigm/club/v1", P2, "3", onePred(AIFPRoles.SUBMIT, openPredicate()));
+        vm.prank(A);
+        channels.adoptParadigm(ch, P2, T0 + 100, true, 0); // scheduled first, effective later
+        vm.prank(A);
+        channels.adoptParadigm(ch, P3, T0 + 50, false, 0); // scheduled second, effective earlier
+        assertEq(channels.paradigmAt(ch, T0 + 49), P1, "before either");
+        assertEq(channels.paradigmAt(ch, T0 + 50), P3, "the earlier one from its effective timepoint");
+        assertEq(channels.paradigmAt(ch, T0 + 99), P3);
+        assertEq(channels.paradigmAt(ch, T0 + 100), P2, "the later one from its effective timepoint, although recorded first");
+        assertEq(channels.paradigmAt(ch, T0 + 1_000), P2);
+        assertEq(uint256(channels.readmissionEpochAt(ch, T0 + 99)), 0);
+        assertEq(uint256(channels.readmissionEpochAt(ch, T0 + 100)), 1, "its re-admission requirement comes with it");
+        warpBy(100);
+        (bytes32 current, uint48 since) = channels.currentParadigm(ch);
+        assertEq(current, P2);
+        assertEq(uint256(since), uint256(T0 + 100));
+    }
+
+    /// @dev Adoptions are never removed: one that is superseded at its own effective timepoint by a later
+    ///      record no longer names the paradigm in force, but a re-admission it required still applies.
+    function test_superseded_adoption_still_opens_its_readmission_epoch() public {
+        bytes32 P3 = successorParadigm(A, "fam", "aifp:paradigm/club/v1", P2, "3", onePred(AIFPRoles.SUBMIT, openPredicate()));
+        vm.prank(A);
+        channels.adoptParadigm(ch, P2, T0 + 50, true, 0);
+        vm.prank(A);
+        channels.adoptParadigm(ch, P3, T0 + 50, false, 0);
+        assertEq(channels.paradigmAt(ch, T0 + 50), P3, "the later record wins the tie");
+        assertEq(uint256(channels.readmissionEpochAt(ch, T0 + 50)), 1, "the epoch of the superseded adoption stands");
     }
 
     function test_readmission_epoch_counts_only_effective_requiring_adoptions() public {
@@ -291,6 +341,28 @@ contract ChannelRegistryTest is Fixture {
         vm.prank(A);
         vm.expectRevert(abi.encodeWithSelector(IAIFPChannelRegistry.AIFP_ChannelClosed.selector, ch));
         channels.setState(ch, IAIFPChannelRegistry.ChannelState.Active);
+    }
+
+    /// @dev The interface exposes the current state only. The reference registry also counts the changes,
+    ///      so that a contract can tell that a channel was not frozen and released between two reads.
+    function test_state_changes_are_counted() public {
+        assertEq(uint256(channels.stateChanges(ch)), 0);
+        vm.prank(A);
+        channels.setState(ch, IAIFPChannelRegistry.ChannelState.Active); // already active: not a change
+        assertEq(uint256(channels.stateChanges(ch)), 0);
+        vm.prank(A);
+        channels.setState(ch, IAIFPChannelRegistry.ChannelState.Frozen);
+        vm.prank(A);
+        channels.setState(ch, IAIFPChannelRegistry.ChannelState.Frozen); // still frozen: not a change
+        assertEq(uint256(channels.stateChanges(ch)), 1);
+        vm.prank(A);
+        channels.setState(ch, IAIFPChannelRegistry.ChannelState.Active);
+        assertEq(uint256(channels.stateChanges(ch)), 2);
+        vm.prank(A);
+        channels.setState(ch, IAIFPChannelRegistry.ChannelState.Closed);
+        assertEq(uint256(channels.stateChanges(ch)), 3);
+        vm.expectRevert(abi.encodeWithSelector(IAIFPChannelRegistry.AIFP_UnknownChannel.selector, bytes32("nope")));
+        channels.stateChanges(bytes32("nope"));
     }
 
     function test_transfer_authority() public {

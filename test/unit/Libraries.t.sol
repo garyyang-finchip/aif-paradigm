@@ -156,17 +156,77 @@ contract PredicatesTest is TestBase {
         assertEq(h.hashOf(abi.encode(nodes)), keccak256(abi.encode(nodes)));
     }
 
-    function test_too_many_nodes() public view {
-        AIFPPredicates.Node[] memory nodes = new AIFPPredicates.Node[](65);
-        for (uint256 i = 0; i < 65; i++) {
+    /// @dev One composite root with `n - 1` open leaves under it.
+    function fan(uint256 n) internal pure returns (AIFPPredicates.Node[] memory nodes) {
+        nodes = new AIFPPredicates.Node[](n);
+        nodes[0] = leaf(AIFPPredicates.ANY_OF);
+        nodes[0].childStart = 1;
+        // forge-lint: disable-next-line(unsafe-typecast)
+        nodes[0].childCount = uint8(n - 1);
+        for (uint256 i = 1; i < n; i++) {
             nodes[i] = leaf(AIFPPredicates.OPEN);
         }
-        assertFalse(h.isWellFormed(abi.encode(nodes)));
-        AIFPPredicates.Node[] memory ok = new AIFPPredicates.Node[](64);
-        for (uint256 i = 0; i < 64; i++) {
-            ok[i] = leaf(AIFPPredicates.OPEN);
+    }
+
+    function test_too_many_nodes() public view {
+        assertFalse(h.isWellFormed(abi.encode(fan(65))), "65 nodes");
+        assertTrue(h.isWellFormed(abi.encode(fan(64))), "64 nodes: a root and 63 leaves");
+    }
+
+    /// @dev A node that no composite names as its child is not part of the tree.
+    function test_unreachable_node_is_malformed() public view {
+        AIFPPredicates.Node[] memory two = new AIFPPredicates.Node[](2);
+        two[0] = leaf(AIFPPredicates.OPEN);
+        two[1] = leaf(AIFPPredicates.OPEN);
+        assertFalse(h.isWellFormed(abi.encode(two)), "two roots");
+        AIFPPredicates.Node[] memory nodes = fan(4);
+        nodes[0].childCount = 2; // node 3 is left without a parent
+        assertFalse(h.isWellFormed(abi.encode(nodes)), "an orphan after the last child");
+    }
+
+    /// @dev A node that two composites name as their child would be evaluated once per path.
+    function test_node_with_two_parents_is_malformed() public view {
+        // allOf(anyOf(x), anyOf(x)) with both inner composites pointing at node 3
+        AIFPPredicates.Node[] memory nodes = new AIFPPredicates.Node[](4);
+        nodes[0] = leaf(AIFPPredicates.ALL_OF);
+        nodes[0].childStart = 1;
+        nodes[0].childCount = 2;
+        nodes[1] = leaf(AIFPPredicates.ANY_OF);
+        nodes[1].childStart = 3;
+        nodes[1].childCount = 1;
+        nodes[2] = leaf(AIFPPredicates.ANY_OF);
+        nodes[2].childStart = 3;
+        nodes[2].childCount = 1;
+        nodes[3] = leaf(AIFPPredicates.OPEN);
+        assertFalse(h.isWellFormed(abi.encode(nodes)), "shared child");
+        // overlapping child ranges: node 0 owns [1, 3), node 1 owns [2, 4)
+        nodes[1].childStart = 2;
+        nodes[1].childCount = 2;
+        nodes[2] = leaf(AIFPPredicates.OPEN);
+        assertFalse(h.isWellFormed(abi.encode(nodes)), "overlapping ranges");
+        // the same four nodes as a proper tree: allOf(anyOf(open), open) needs node 1 to own [3, 4) only
+        nodes[1].childStart = 3;
+        nodes[1].childCount = 1;
+        assertTrue(h.isWellFormed(abi.encode(nodes)), "each node has one parent");
+    }
+
+    /// @dev Five layers of four composites, each naming the whole next layer, and one leaf at the bottom: 22
+    ///      nodes that used to be accepted and called that leaf 1,024 times.
+    function test_layered_sharing_is_malformed() public view {
+        AIFPPredicates.Node[] memory nodes = new AIFPPredicates.Node[](22);
+        nodes[0] = leaf(AIFPPredicates.ALL_OF);
+        nodes[0].childStart = 1;
+        nodes[0].childCount = 4;
+        for (uint8 layer = 0; layer < 5; layer++) {
+            for (uint8 j = 0; j < 4; j++) {
+                uint8 idx = 1 + layer * 4 + j;
+                nodes[idx] = leaf(AIFPPredicates.ALL_OF);
+                nodes[idx].childStart = layer < 4 ? 1 + (layer + 1) * 4 : 21;
+                nodes[idx].childCount = layer < 4 ? 4 : 1;
+            }
         }
-        assertTrue(h.isWellFormed(abi.encode(ok)));
+        nodes[21] = leaf(AIFPPredicates.OPEN);
+        assertFalse(h.isWellFormed(abi.encode(nodes)));
     }
 
     function test_child_must_follow_parent() public view {
@@ -215,6 +275,154 @@ contract PredicatesTest is TestBase {
         nodes[3] = leaf(AIFPPredicates.OPEN);
         nodes[4] = leaf(AIFPPredicates.OPEN);
         assertTrue(h.isWellFormed(abi.encode(nodes)));
+    }
+
+    /// @dev `links` single-child composites in a row ending in one open leaf: the leaf lies at depth `links`.
+    function chain(uint256 links) internal pure returns (AIFPPredicates.Node[] memory nodes) {
+        nodes = new AIFPPredicates.Node[](links + 1);
+        for (uint256 i = 0; i < links; i++) {
+            nodes[i] = leaf(AIFPPredicates.ALL_OF);
+            // forge-lint: disable-next-line(unsafe-typecast)
+            nodes[i].childStart = uint8(i + 1);
+            nodes[i].childCount = 1;
+        }
+        nodes[links] = leaf(AIFPPredicates.OPEN);
+    }
+
+    /// @dev anyOf(open, <branch>), the branch being `links` composites in a row ending in a leaf: that leaf
+    ///      lies at depth `links + 1`, while the first child of the root lies at depth 1.
+    function sideBranch(uint256 links) internal pure returns (AIFPPredicates.Node[] memory nodes) {
+        nodes = new AIFPPredicates.Node[](links + 3);
+        nodes[0] = leaf(AIFPPredicates.ANY_OF);
+        nodes[0].childStart = 1;
+        nodes[0].childCount = 2;
+        nodes[1] = leaf(AIFPPredicates.OPEN);
+        for (uint256 i = 2; i < links + 2; i++) {
+            nodes[i] = leaf(AIFPPredicates.ALL_OF);
+            // forge-lint: disable-next-line(unsafe-typecast)
+            nodes[i].childStart = uint8(i + 1);
+            nodes[i].childCount = 1;
+        }
+        nodes[links + 2] = leaf(AIFPPredicates.OPEN);
+    }
+
+    /// @dev The root has depth 0 and a child one more than its parent; no node may lie deeper than 8.
+    function test_depth_limit_sits_at_eight() public view {
+        assertTrue(h.isWellFormed(abi.encode(chain(8))), "a leaf at depth 8");
+        assertFalse(h.isWellFormed(abi.encode(chain(9))), "a leaf at depth 9");
+        assertFalse(h.isWellFormed(abi.encode(chain(63))), "a chain through all 64 nodes");
+    }
+
+    /// @dev The depth of every node counts, not only of the nodes an evaluation would visit: one branch that
+    ///      is too deep makes the array malformed, however shallow the rest of the tree is.
+    function test_depth_is_checked_on_every_branch() public view {
+        assertTrue(h.isWellFormed(abi.encode(sideBranch(7))), "deepest leaf at depth 8");
+        assertFalse(h.isWellFormed(abi.encode(sideBranch(8))), "deepest leaf at depth 9");
+        // A wide tree is not a deep one: 63 leaves under the root all lie at depth 1.
+        assertTrue(h.isWellFormed(abi.encode(fan(64))), "wide");
+    }
+
+    /// @dev Section 6.1 stated another way than the library computes it: count the composites that name each
+    ///      node, then walk from every node up to the root and count the steps.
+    function expectedWellFormed(AIFPPredicates.Node[] memory nodes) internal pure returns (bool) {
+        uint256 n = nodes.length;
+        if (n == 0 || n > 64) return false;
+        uint256[] memory parents = new uint256[](n);
+        uint256[] memory parentOf = new uint256[](n);
+        for (uint256 i = 0; i < n; i++) {
+            uint256 start = nodes[i].childStart;
+            uint256 count = nodes[i].childCount;
+            if (nodes[i].kind != AIFPPredicates.ALL_OF && nodes[i].kind != AIFPPredicates.ANY_OF) {
+                if (start != 0 || count != 0) return false;
+                continue;
+            }
+            if (count == 0 || start <= i || start + count > n) return false;
+            for (uint256 c = start; c < start + count; c++) {
+                parents[c]++;
+                parentOf[c] = i;
+            }
+        }
+        for (uint256 j = 1; j < n; j++) {
+            if (parents[j] != 1) return false;
+        }
+        for (uint256 j = 1; j < n; j++) {
+            uint256 depth;
+            for (uint256 k = j; k != 0; k = parentOf[k]) depth++;
+            if (depth > 8) return false;
+        }
+        return true;
+    }
+
+    /// @dev A tree built breadth-first as the canonical validator allocates it, of up to `size` nodes, in which
+    ///      a node becomes a composite with probability `compositeIn256 / 256` while nodes remain to be given
+    ///      and a composite has between one and `maxChildren` children. With one child per composite the tree
+    ///      is a chain, and deep; with three it is shallow.
+    function randomTree(uint256 seed, uint256 size, uint256 compositeIn256, uint256 maxChildren)
+        internal
+        pure
+        returns (AIFPPredicates.Node[] memory nodes)
+    {
+        nodes = new AIFPPredicates.Node[](size);
+        uint256 next = 1;
+        for (uint256 i = 0; i < next; i++) {
+            seed = uint256(keccak256(abi.encode(seed, i)));
+            if (next < size && (seed & 0xff) < compositeIn256) {
+                uint256 count = 1 + ((seed >> 8) % maxChildren);
+                if (count > size - next) count = size - next;
+                nodes[i] = leaf((seed >> 16) & 1 == 0 ? AIFPPredicates.ALL_OF : AIFPPredicates.ANY_OF);
+                // forge-lint: disable-next-line(unsafe-typecast)
+                nodes[i].childStart = uint8(next);
+                // forge-lint: disable-next-line(unsafe-typecast)
+                nodes[i].childCount = uint8(count);
+                next += count;
+            } else {
+                nodes[i] = leaf(AIFPPredicates.OPEN);
+            }
+        }
+        assembly ("memory-safe") {
+            mstore(nodes, next) // drop the nodes that were not given to any composite
+        }
+    }
+
+    /// @dev Random trees, half of them with one field of one node changed afterwards, against the independent
+    ///      statement above. Chains are deep and bushy trees shallow, so both sides of the depth limit and
+    ///      both kinds of defect (shape and depth) occur.
+    function testFuzz_isWellFormed_matches_an_independent_statement(uint256 seed) public view {
+        AIFPPredicates.Node[] memory nodes = randomTree(seed, 1 + (seed % 64), 160 + ((seed >> 8) % 96), 1 + ((seed >> 16) % 3));
+        uint256 r = uint256(keccak256(abi.encode(seed, "mutation")));
+        if (r & 1 == 1) {
+            AIFPPredicates.Node memory target = nodes[(r >> 8) % nodes.length];
+            uint256 field = (r >> 16) % 3;
+            // forge-lint: disable-next-line(unsafe-typecast)
+            uint8 delta = (r >> 24) & 1 == 0 ? 1 : uint8(255); // plus or minus one, wrapping
+            unchecked {
+                if (field == 0) target.childStart += delta;
+                else if (field == 1) target.childCount += delta;
+                else target.kind = target.kind == AIFPPredicates.OPEN ? AIFPPredicates.ANY_OF : AIFPPredicates.OPEN;
+            }
+        }
+        assertTrue(h.isWellFormed(abi.encode(nodes)) == expectedWellFormed(nodes), "isWellFormed differs from Section 6.1");
+    }
+
+    /// @dev The fuzz above is only worth something if it meets both answers and both reasons for a refusal.
+    function test_the_random_trees_cover_both_answers() public view {
+        uint256 wellFormed;
+        uint256 tooDeepOnly;
+        uint256 malformedShape;
+        for (uint256 seed = 1; seed <= 400; seed++) {
+            AIFPPredicates.Node[] memory nodes = randomTree(seed * 7919, 1 + (seed % 64), 160 + (seed % 96), 1 + (seed % 3));
+            bool expected = expectedWellFormed(nodes);
+            assertTrue(h.isWellFormed(abi.encode(nodes)) == expected, "isWellFormed differs from Section 6.1");
+            if (expected) wellFormed++;
+            else tooDeepOnly++; // an unmutated tree can only fail on depth
+            nodes[0].childCount = 0; // a root that claims nothing: malformed unless it is the only node
+            nodes[0].kind = AIFPPredicates.ANY_OF;
+            assertFalse(h.isWellFormed(abi.encode(nodes)), "composite without children");
+            malformedShape++;
+        }
+        assertTrue(wellFormed > 200, "too few well-formed trees");
+        assertTrue(tooDeepOnly > 30, "too few trees beyond the depth limit");
+        assertTrue(malformedShape == 400);
     }
 }
 

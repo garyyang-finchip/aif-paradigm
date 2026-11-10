@@ -18,6 +18,7 @@ interface Vm {
     function startPrank(address msgSender) external;
     function stopPrank() external;
     function deal(address account, uint256 newBalance) external;
+    function etch(address target, bytes calldata newRuntimeBytecode) external;
     function label(address account, string calldata newLabel) external;
     function expectRevert() external;
     function expectRevert(bytes4 revertData) external;

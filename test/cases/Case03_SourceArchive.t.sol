@@ -52,7 +52,7 @@ contract Case03_SourceArchive is CaseBase {
         participation.admit(ann, AIFPRoles.SUBMIT, 0, openPredicate(), noEvidence(), 0);
         anchorAs(A, ann, AIFPEvents.ACTION_PUBLISH, bytes32("bulletin-1"), noRel());
         vm.prank(B);
-        vm.expectRevert(abi.encodeWithSelector(IAIFPEventAnchor.AIFP_RoleNotHeld.selector, ann, subj(B), uint16(AIFPRoles.SUBMIT)));
+        vm.expectRevert(abi.encodeWithSelector(IAIFPEventAnchor.AIFP_RoleNotHeld.selector, ann, subj(B), uint16(AIFPRoles.SUBMIT), AIFPOutcomes.NOT_SATISFIED));
         anchor.anchor(ann, AIFPEvents.ACTION_PUBLISH, bytes32("bulletin-2"), noRel());
     }
 

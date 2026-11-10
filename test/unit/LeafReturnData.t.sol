@@ -79,7 +79,7 @@ contract LeafReturnDataTest is Fixture {
         uint8 out = ev(badLeaf(), noEvidence());
         uint256 used = before - gasleft();
         assertOutcome(out, E, "burn");
-        assertTrue(used < verifier.LEAF_GAS_LIMIT() + 150_000, "one leaf spent more than its bound");
+        assertTrue(used < verifier.leafGasLimit() + 150_000, "one leaf spent more than its bound");
     }
 
     // ------------------------------------------------------------ allowlist leaves
@@ -123,6 +123,7 @@ contract LeafReturnDataTest is Fixture {
 
         vm.prank(A);
         set.add(subj(B));
+        assertOutcome(ev(allOf2(allowlistPredicate(address(set)), badLeaf()), noEvidence()), E, "allOf of the same two leaves");
         assertOutcome(
             participation.previewAdmission(channel, subj(B), AIFPRoles.SUBMIT, bytes32(0), predicate, noEvidence()),
             S,

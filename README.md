@@ -22,12 +22,18 @@ for the term-by-term mapping.
 - Boundary cases: [`docs/boundary-cases.md`](docs/boundary-cases.md)
 - Sepolia runbook: [`docs/sepolia-runbook.md`](docs/sepolia-runbook.md)
 
-Status: v0.1.2 - number ERC-8489 assigned by the editors on 2026-11-09; draft text, reference contracts,
-163 Foundry tests, validator and vectors complete; v0.1.2 fixes the composite verifier's handling of leaf return
-data reported on the Magicians thread (see `docs/design-memo.md`, section 8); Ethereum Magicians thread
+Status: v0.1.3 - number ERC-8489 assigned by the editors on 2026-11-09; draft text, reference contracts,
+226 Foundry tests, validator and vectors complete. v0.1.2 and v0.1.3 are review rounds from the Magicians thread
+(see `docs/design-memo.md`, section 8): leaf answers are judged by their raw return data and never copied beyond
+one word; every leaf that is called is given a fixed gas bound in full, or the evaluation fails without an
+outcome; a failed evaluation is never reported as `VERIFIER_ERROR`; the predicate array has to be a tree of
+bounded depth and a decided composite stops evaluating; event records name the role binding that authorized
+them; an objection window confirms its integrity instead of presuming it. Ethereum
+Magicians thread
 [ERC-8489: Agent Information Flow Paradigm](https://ethereum-magicians.org/t/erc-8489-agent-information-flow-paradigm/30300)
-and ethereum/ERCs pull request [#2152](https://github.com/ethereum/ERCs/pull/2152) open; reference stack deployed
-on Sepolia with the boundary-case evidence run recorded in [`docs/sepolia-evidence.md`](docs/sepolia-evidence.md).
+and ethereum/ERCs pull request [#2152](https://github.com/ethereum/ERCs/pull/2152) open; the v0.1.1 reference
+stack is deployed on Sepolia with the boundary-case evidence run recorded in
+[`docs/sepolia-evidence.md`](docs/sepolia-evidence.md).
 
 ## What it standardizes
 
@@ -95,7 +101,7 @@ Foundry (forge 1.x, solc 0.8.28) and Node 22.
 
 ```
 forge build
-forge test                                   # 163 tests, 25 suites; no `forge install` needed
+forge test                                   # 226 tests, 27 suites; no `forge install` needed
 npm ci && npm run check                      # validates every example, rejects the invalid ones, regenerates vectors
 node tools/descriptor-validate.mjs assets/erc-aifp/examples/paradigms/panel.json --brief
 python3 tools/make-filing-package.py          # ercs-pr-package/ERCS/erc-8489.md + assets/erc-8489/, linted
@@ -119,6 +125,11 @@ tests without submodules or network access beyond the compiler download.
 Sepolia (chain id 11155111), deployed from the build described in `foundry.toml`; full record with transaction
 hashes, gas, runtime code hashes and the two-phase boundary-case run in
 [`docs/sepolia-evidence.md`](docs/sepolia-evidence.md) and `deployments/11155111*.json`.
+
+These addresses are the v0.1.1 build. v0.1.2 and v0.1.3 changed `AIFPCompositeVerifier`,
+`AIFPParticipationRegistry`, `AIFPChannelRegistry`, `AIFPEventAnchor` and `AIFPObjectionWindow` (see
+`docs/design-memo.md`, section 8); the stack will be redeployed and the evidence run repeated once the current
+review round has settled, and this table replaced then.
 
 | Contract | Address |
 | --- | --- |

@@ -44,16 +44,16 @@ contract EventAnchorTest is Fixture {
     function test_role_checks_per_action() public {
         // O holds nothing
         vm.prank(O);
-        vm.expectRevert(abi.encodeWithSelector(IAIFPEventAnchor.AIFP_RoleNotHeld.selector, ch, subj(O), uint16(AIFPRoles.SUBMIT)));
+        vm.expectRevert(abi.encodeWithSelector(IAIFPEventAnchor.AIFP_RoleNotHeld.selector, ch, subj(O), uint16(AIFPRoles.SUBMIT), AIFPOutcomes.NOT_SATISFIED));
         anchor.anchor(ch, AIFPEvents.ACTION_PUBLISH, bytes32("x"), none());
         // B lacks MODIFY and REDISTRIBUTE
         vm.prank(B);
-        vm.expectRevert(abi.encodeWithSelector(IAIFPEventAnchor.AIFP_RoleNotHeld.selector, ch, subj(B), uint16(AIFPRoles.MODIFY)));
+        vm.expectRevert(abi.encodeWithSelector(IAIFPEventAnchor.AIFP_RoleNotHeld.selector, ch, subj(B), uint16(AIFPRoles.MODIFY), AIFPOutcomes.NOT_SATISFIED));
         anchor.anchor(ch, AIFPEvents.ACTION_MODIFY, bytes32("x"), none());
         vm.prank(A);
         anchor.anchor(ch, AIFPEvents.ACTION_PUBLISH, bytes32("src"), none());
         vm.prank(B);
-        vm.expectRevert(abi.encodeWithSelector(IAIFPEventAnchor.AIFP_RoleNotHeld.selector, ch, subj(B), uint16(AIFPRoles.REDISTRIBUTE)));
+        vm.expectRevert(abi.encodeWithSelector(IAIFPEventAnchor.AIFP_RoleNotHeld.selector, ch, subj(B), uint16(AIFPRoles.REDISTRIBUTE), AIFPOutcomes.NOT_SATISFIED));
         anchor.anchor(ch, AIFPEvents.ACTION_FORWARD, bytes32("src"), rel(AIFPEvents.REL_FORWARDS, bytes32("src")));
         // B can respond
         vm.prank(B);
@@ -173,7 +173,7 @@ contract ObjectionWindowTest is Fixture {
 
     function test_open_requires_submit_and_valid_bounds() public {
         vm.prank(B);
-        vm.expectRevert(AIFPObjectionWindow.RoleNotHeld.selector);
+        vm.expectRevert(abi.encodeWithSelector(AIFPObjectionWindow.RoleNotHeld.selector, AIFPOutcomes.NOT_SATISFIED));
         win.open(ch, bytes32("p"), now48() + 10, now48() + 20, AIFPRoles.RESPOND);
         vm.prank(A);
         vm.expectRevert(AIFPObjectionWindow.InvalidWindow.selector);
@@ -182,6 +182,7 @@ contract ObjectionWindowTest is Fixture {
         vm.expectRevert(AIFPObjectionWindow.InvalidWindow.selector);
         win.open(ch, bytes32("p"), now48() + 20, now48() + 20, AIFPRoles.RESPOND);
         uint256 id = openWindow();
+        assertEq(uint256(win.window(id).stateChangesAtOpen), uint256(channels.stateChanges(ch)));
         AIFPObjectionWindow.Window memory w = win.window(id);
         assertEq(w.proposer, subj(A));
         assertEq(uint256(w.status), uint256(win.STATUS_OPEN()));
@@ -197,7 +198,7 @@ contract ObjectionWindowTest is Fixture {
         warpBy(10);
         // outsider / wrong role
         vm.prank(O);
-        vm.expectRevert(AIFPObjectionWindow.RoleNotHeld.selector);
+        vm.expectRevert(abi.encodeWithSelector(AIFPObjectionWindow.RoleNotHeld.selector, AIFPOutcomes.NOT_SATISFIED));
         win.object(id, bytes32("x"));
         vm.prank(B);
         win.object(id, bytes32("disagree"));
@@ -235,19 +236,87 @@ contract ObjectionWindowTest is Fixture {
         assertEq(uint256(win.window(id).objections), 1);
     }
 
-    function test_resolve_undeterminable_when_integrity_broken() public {
-        uint256 id = openWindow();
-        warpBy(20);
-        // cannot report while the channel is active
-        vm.expectRevert(AIFPObjectionWindow.InvalidWindow.selector);
-        win.reportIntegrityBreak(id);
+    /// @dev The objection role has to be one defined role bit. A window opened on any other value could
+    ///      never be objected to, and its default would follow from nobody having been able to object.
+    function test_open_rejects_an_objection_role_nobody_can_hold() public {
+        uint16[3] memory invalid = [uint16(0), AIFPRoles.RESPOND | AIFPRoles.SUBMIT, uint16(1 << 11)];
+        for (uint256 i = 0; i < invalid.length; i++) {
+            vm.prank(A);
+            vm.expectRevert(AIFPObjectionWindow.InvalidWindow.selector);
+            win.open(ch, bytes32("p"), now48() + 10, now48() + 20, invalid[i]);
+        }
+        assertEq(win.windowCount(), 0);
+    }
+
+    function test_open_requires_an_active_channel() public {
         vm.prank(A);
         channels.setState(ch, IAIFPChannelRegistry.ChannelState.Frozen);
-        win.reportIntegrityBreak(id);
+        vm.prank(A);
+        vm.expectRevert(AIFPObjectionWindow.ChannelNotActive.selector);
+        win.open(ch, bytes32("p"), now48() + 10, now48() + 20, AIFPRoles.RESPOND);
+    }
+
+    /// @dev Integrity is confirmed, not presumed: a channel that was frozen and released inside the window
+    ///      leaves the window UNDETERMINABLE although nobody reported anything and the channel is active
+    ///      again when the window is resolved.
+    function test_resolve_undeterminable_when_the_channel_was_frozen_during_the_window() public {
+        uint256 id = openWindow();
+        assertTrue(win.integrityHolds(id), "nothing has happened to the channel yet");
+        warpBy(20);
+        vm.prank(A);
+        channels.setState(ch, IAIFPChannelRegistry.ChannelState.Frozen);
+        assertFalse(win.integrityHolds(id), "frozen");
+        warpBy(1);
+        vm.prank(A);
+        channels.setState(ch, IAIFPChannelRegistry.ChannelState.Active);
+        assertFalse(win.integrityHolds(id), "released, and the window is not whole again");
+        warpBy(100);
+        assertEq(uint256(win.resolve(id)), uint256(win.STATUS_UNDETERMINABLE()));
+    }
+
+    /// @dev Also when the freeze and the release fall into one timepoint: the count of state changes sees
+    ///      them where a comparison of timepoints would not.
+    function test_freeze_and_release_within_one_timepoint_breaks_integrity() public {
+        uint256 id = openWindow();
+        warpBy(20);
+        vm.prank(A);
+        channels.setState(ch, IAIFPChannelRegistry.ChannelState.Frozen);
         vm.prank(A);
         channels.setState(ch, IAIFPChannelRegistry.ChannelState.Active);
         warpBy(100);
         assertEq(uint256(win.resolve(id)), uint256(win.STATUS_UNDETERMINABLE()));
+    }
+
+    /// @dev What the companion can confirm is stricter than the rule: a state change before the window
+    ///      starts also leaves it unconfirmed, because the registry's count says that the state changed and
+    ///      not when. A call that sets the state the channel already has is not a change.
+    function test_integrity_condition_errs_towards_undeterminable() public {
+        uint256 first = openWindow(); // starts 10 timepoints from now
+        vm.prank(A);
+        channels.setState(ch, IAIFPChannelRegistry.ChannelState.Active);
+        assertTrue(win.integrityHolds(first), "setting the state the channel already has is not a change");
+        vm.prank(A);
+        channels.setState(ch, IAIFPChannelRegistry.ChannelState.Frozen);
+        vm.prank(A);
+        channels.setState(ch, IAIFPChannelRegistry.ChannelState.Active);
+        uint256 second = openWindow(); // opened after the release: whole
+        warpBy(110);
+        assertEq(uint256(win.resolve(first)), uint256(win.STATUS_UNDETERMINABLE()), "frozen and released before its start");
+        assertEq(uint256(win.resolve(second)), uint256(win.STATUS_DEFAULT_TRIGGERED()), "opened after the release");
+    }
+
+    /// @dev An objection registered inside the window is a fact: it decides the window whatever happened to
+    ///      the channel, during the window or after it. Only the absence of objections needs integrity.
+    function test_objection_decides_whatever_happened_to_the_channel() public {
+        uint256 id = openWindow();
+        warpBy(20);
+        vm.prank(A);
+        channels.setState(ch, IAIFPChannelRegistry.ChannelState.Frozen);
+        vm.prank(C);
+        win.object(id, bytes32("no")); // the role check works in a frozen channel
+        warpBy(100);
+        assertFalse(win.integrityHolds(id));
+        assertEq(uint256(win.resolve(id)), uint256(win.STATUS_OBJECTED()), "frozen from the window to its resolution, and objected");
     }
 
     function test_resolve_undeterminable_when_channel_not_active_at_resolution() public {
