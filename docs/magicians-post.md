@@ -461,3 +461,45 @@ same block; the grant names that binding, and the `RoleGranted` log precedes the
 
 The fields are appended, the existing ones keep their order, and events are not part of the ERC-165 identifiers,
 so no interface id changes. 229 tests. In the repository and in PR #2152.
+
+## Reply to the review of the gas check (tenth post; reply of 2026-11-11)
+
+The review (tenth post, of commit 70a696f0): `hasGasFor` keeps the 10,000 margin on top of 64/63 of the bound and
+the 2,600 for a cold leaf address comes off before the split, so a leaf gets the full bound on its first call in
+the transaction - no gap in the check itself. Both remaining dependences are narrower than the text said: warm
+access is never more expensive than cold, so a leaf that fits the bound from a cold start answers the same in the
+preview and in the admission, and what still diverges is a leaf that reads `gasleft()` after touching state; on
+the balance, no opcode exposes the transaction's gas limit and `eth_call` usually runs at gas price 0, so the
+preview overstates the balance every time. And under EIP-7825 (2^24 gas per transaction) 17 leaves that burn
+their bound do not fit in one evaluation, so an `anyOf` with that many broken leaves ahead of the satisfying one
+can never be admitted - for the worst case in the Security Considerations.
+
+Reply:
+
+---
+
+@Zealynx thanks for checking the check. The 2,600 comes off first because `_eval` reads the leaf's code size
+before `_callLeaf`, so the account is warm by the time `hasGasFor` runs; the margin then only has to cover the
+call itself and the opcodes in between.
+
+All three narrowings are right, and they are now in the text, nothing else changed:
+
+- **Touched state.** Section 6.3 states the dependence one way: warm access never costs more than cold, so a
+  leaf that completes within the bound from a cold start completes in every transaction and answers the same in
+  a preview and in the admission; a leaf whose cold cost exceeds the bound is `VERIFIER_ERROR` cold and can
+  answer warm. It names the case you describe next to the balance case: a leaf that reads `gasleft()` after
+  touching state sees what its reads cost and can answer differently however exactly the bound is forwarded. The
+  SHOULD now covers it (a leaf verifier should not make its answer depend on the gas it has left).
+- **Balance.** Added that no opcode exposes the transaction's gas limit, so nothing on chain can correct for the
+  charge, and that an `eth_call` at gas price zero does not reduce the balance at all, so a preview overstates
+  it every time.
+- **EIP-7825.** In the Security Considerations, with the figure: under the 2^24 cap a transaction funds at most
+  16 leaf calls of 1,000,000 gas, so an `anyOf` with 17 or more faulty leaves ahead of its satisfying child can
+  never be admitted under the reference bound, whatever the caller supplies, and the 63-leaf limit of 6.1 is a
+  limit on shape, not a guarantee that a predicate can be evaluated. Authors are told to put the conditions most
+  likely to decide a composite first and, where many delegated leaves are needed, to evaluate under a composite
+  verifier with a lower bound; the bound is a property of the deployment and `leafGasLimit()` reports it, so
+  that option exists without a change to the specification.
+
+In the repository and in PR #2152. Sepolia next: I will redeploy the v0.1.3 stack and rerun the evidence cases,
+and post the record here.

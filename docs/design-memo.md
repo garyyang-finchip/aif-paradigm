@@ -296,6 +296,17 @@ second one, on 2026-11-10, is the source of items 5b, 6b, 7b and 11 to 15).**
     examined in the order of Sections 8.4 and 9.2. `RoleReinstated` is unchanged (its authority is the
     `RoleSuspended` log). Events are not part of the ERC-165 identifiers, which do not change; the authority
     kinds are constants of `AIFPBasis`.
+17. *Text after the review of the gas check (tenth post, 2026-11-10).* The reviewer found no gap in `hasGasFor`
+    and narrowed two statements, both adopted as text: the touched-state dependence runs one way (warm access
+    never costs more than cold, so a leaf that fits the bound from a cold start answers the same everywhere; what
+    still diverges is a leaf that reads `gasleft()` after touching state), and the balance dependence cannot be
+    corrected on chain (no opcode exposes the transaction's gas limit; an `eth_call` at gas price zero
+    overstates the balance every time). Section 6.3 says both. The Security Considerations now put a figure on
+    the worst case: under the EIP-7825 transaction gas cap of 2^24 at most 16 leaf calls of 1,000,000 gas fit in
+    one transaction, so an `anyOf` with 17 or more faulty leaves ahead of its satisfying child can never be
+    admitted under the reference bound, and the 63-leaf limit of Section 6.1 is a limit on shape, not a guarantee
+    of evaluability. The bound stays a constant of the reference contract; making it a constructor argument is
+    a one-line change that the text already allows for (the bound is a property of the deployment).
 
 Interface changes: `leafGasLimit()` is added to `IAIFPCompositeVerifier` (interface identifier `0xe3fe3554`, was
 `0xa5913d6e`) and `evaluateWithBinding` to `IAIFPParticipationRegistry` (`0x1d84a105`, was `0x14c97260`). The
