@@ -140,8 +140,8 @@ Security Considerations of the ERC now state the rule (malformed return data is 
 aborts the tree; the gas forwarded to a leaf SHOULD be bounded and the bound documented), and evaluation scenario
 9 plus the suite `test/unit/LeafReturnData.t.sol` (eleven tests, mock `MisbehavingVerifier`) cover empty, short,
 long and out-of-range return data, a gas-exhausting leaf, and the registry admitting a subject in the allowlist
-despite a broken external leaf. The Sepolia deployment recorded in `docs/sepolia-evidence.md` predates this
-change; its verifier is the v0.1.1 build.
+despite a broken external leaf. The v0.1.1 Sepolia deployment (`docs/sepolia-evidence-v0.1.1.md`) predates this
+change; the v0.1.3 deployment in `docs/sepolia-evidence.md` carries it.
 
 **v0.1.3 - gas-independent outcomes, bounded return-data copy, decisions within a timepoint (second review
 round on the Magicians thread, 2026-11-09, followed by two internal adversarial reviews of the result; the
@@ -316,7 +316,7 @@ its last field and `EventAnchored` as its last parameter; the existing fields ke
 for the earlier record still reads them correctly, and the record is stored packed (six storage slots, as before;
 a publish costs about 20,000 gas more than in v0.1.1 because its `action` no longer occupies an empty slot of its
 own). The ERC-165 identifier of `IAIFPEventAnchor` does not change (`0x62b24396`): return types and events are not
-part of it, so the v0.1.1 anchor on Sepolia reports the same identifier while returning the shorter record.
+part of it, so the v0.1.1 anchor still on Sepolia reports the same identifier while returning the shorter record.
 `AIFP_RoleNotHeld` gains the outcome. The companion's `WindowOpened` gains the binding and the opening timepoint,
 `ObjectionRegistered` the binding. A library `AIFPCalls` is added. The predicate encoding and every committed hash
 are unchanged; an array that was not a tree, or that is deeper than 8, is no longer accepted on any path, and it
@@ -370,4 +370,5 @@ Noted in this round and left alone, as candidates for the next one:
   not added. A leaf call made at call depth 1,024 fails without executing; reaching that depth with a funded leaf
   needs more gas than any chain carries.
 
-The Sepolia deployment is still the v0.1.1 build.
+The v0.1.3 stack is deployed on Sepolia and the evidence run was repeated on it (`docs/sepolia-evidence.md`); the
+v0.1.1 deployment of 2026-11-08 stays on chain, its record moved to `docs/sepolia-evidence-v0.1.1.md`.

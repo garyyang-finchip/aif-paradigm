@@ -1,227 +1,332 @@
 {
-  "bLink": "0x010aa0b677b11cba7cb03c441ec9502a727502c85d0ceca9ce11fe6b77ec3deb",
-  "bPanelist": "0x6012786ecb4c8ad397cbef3e994c75eb9944452f84da21f230d4476e9b813435",
-  "bRules": "0xd21b433e9c9e0435fd50cd284b8cdeb063f44739288d8a6a3cf2ca03c8e2e9c2",
-  "bulletin": "0x2205ce271f37fd067aa550b01cc7ed69689964c8c571dffb077c23d1a931a762",
-  "cObserver": "0xe7000bfd917ebea405cd0437282b1844a05db8b451040d1b2bc1db6e3fef9c66",
-  "commitB": "0x462bda5f7b2ebf9b097874d8394d013ec6151cb2074e3d85e042a86625fd6c09",
-  "commitC": "0x863f5ecf9869adffbb4fb22f562bd78b8c9c6d85362d9b56726611323d2ab624",
-  "council": "0x9e71699a3163c80e7cfd5ae56d475aa3b66eaa133946b0b679bbc466e91bfa0a",
-  "effectiveAt": 1794145304,
-  "link": "0x490aa495c1dc62bf0858057cd6b0dec27f706cf7983f61de907d3cc19bd2dd41",
-  "pClub": "0x4254a4dfada1325d38c90062fac6480f0df9e5c59c3afb0fb4a043bd5bb95756",
-  "pDirect": "0xd7168efb3d8f279af80b501e30dfb52087d9c3935e567cb2137de404f6fb842b",
-  "pIntake": "0xaa1d4316be67a70ced10be7aba38e533bd32c60a534b67d56c4dfd7caad38855",
-  "pMeeting": "0x5dd42e45e5e9f35ab316cd89ed86819434d801470c8194c73219df8edf23642e",
-  "pPanel": "0xcb06318a54ca98e10d45f692fdb5f74e7da1a94c58400844edc80f1ea90df050",
-  "pRulesV1": "0x3ae478fc3e1273c59b423c749433b1c76e0102f0e4bd148b06f9b8558e17dc68",
-  "pRulesV2": "0x7b22ee5725aff9b7a29895b0d4615caf01c7a5f19de95be0b4a847b8cef1eb74",
-  "pSource": "0x63b5393efec8a54ac1320a0d14ac4cf86d8089cade6c52092e96a5e2d6be95f7",
-  "phase1At": 1794143256,
-  "postA": "0x52a99c6f1507bd8fe1a3e8e4d0bbaba81c01d1f50c961a8f33325508c61bd821",
-  "room": "0xdbf12ca5fcc2a99bad1ebaaf8cf384d7287d7ea0069755dc8629224b289ee305",
-  "rules": "0x949a6415d9ef47d5c28becf0648203fa5f52b84f610d3a8bccc343eff4f7dec5",
-  "summary": "0xac34604414853e39ac207c4b2f72076d795c86cb91ca4fd08d4b11afc7c5a7b9",
-  "talk": "0xd4ed20b8de9ec893278997f621828dd98568f7794899dec11961ae14f30f858a",
-  "tender": "0xd4d27fe9c51faecc55655567f501ca6e62f7706df641fb6e2f44e5bd3a6284ca",
-  "windowDeadline": 1794148304,
-  "windowId": 0,
-  "phase1Blocks": {
-    "A": [
-      12090759,
-      12090766
-    ],
-    "B": [
-      12090772
-    ],
-    "C": [
-      12090775
-    ]
-  },
-  "actors": {
-    "A": "0xfaf78B3D533411Bb921d119a9881C04060869065",
-    "B": "0x70C8e57fF73E36761127d28Ed29D8f8cfB9831b6",
-    "C": "0x863D46f2c932122bAc1032A4b41b4C29d99229DC"
-  },
-  "cSubmit": "0x3e1f6bbcaf22dc52a55e5d06a3773ecda89a5ab19ea53c53fc32a10422c0154d",
-  "cRules": "0x8b89a80e133d24e36468a8bd9f810f056cad6a83af87f0c4df2e02000e6dfd62",
-  "windowStatus": 1,
-  "case4.bPendingBeforeConfirm": 2,
+  "cRules": "0x1b20550857b6c01d1dfdd82c996e0963adea8a53dfd8f6cd01926b2cf0d44325",
+  "cSubmit": "0x9c1cd0c259d8ce09dc542a3b139da05171eb11d9dc1084cdafcb7acdb9fda2ab",
   "case4.bHistoryBeforeChange": 0,
-  "case8.oldRuleRejectedAfterChange": 1,
+  "case4.bPendingBeforeConfirm": 2,
   "case8.bHistoryUnderV1": 0,
   "case8.bNowAfterRevocation": 1,
+  "case8.oldRuleRejectedAfterChange": 1,
   "case9.disclosureRecords": 2,
-  "phase2At": 1794148380,
+  "phase2At": 1794645120,
+  "windowStatus": 1,
   "phase2Blocks": {
     "A": [
-      12091032,
-      12091173
+      12131645,
+      12131936
     ],
     "B": [
-      12091036
+      12131645
     ],
     "C": [
-      12091046
+      12131645,
+      12131656,
+      12131657
     ]
   },
   "phase2Transactions": [
     {
       "idx": 0,
       "actor": "A",
-      "nonce": 49,
+      "nonce": 136,
       "call": "confirmReadmission(bPanelist)",
-      "to": "0x6d0d5a589cdbd07c432c1874f11df3804b309fd0",
-      "block": 12091032,
-      "gasUsed": 314613,
-      "tx": "0x2c90ee75144a8233cb289b2331a79488aab74fa44dbbf75b953e8bdc895c486d"
+      "to": "0xa6242197f6dbd8a8cf8753742b7e0168ee617a83",
+      "block": 12131645,
+      "gasUsed": 319121,
+      "tx": "0xcbbc9771b483b97ad133bc9c882d3068086087f73aa3c53207bd90aa1a8e56cd"
     },
     {
       "idx": 1,
       "actor": "A",
-      "nonce": 50,
+      "nonce": 137,
       "call": "roster.add(C)",
-      "to": "0x4d72639cb1044091e8136105c7e6381ac973ae3a",
-      "block": 12091032,
+      "to": "0xde93b6b9245ef5ec352addfdbc1b1a2b702b755c",
+      "block": 12131645,
       "gasUsed": 141817,
-      "tx": "0x14d1b290546dc6141cb6a47448336ed3c78b21708da2681aada6ae412a009d3e"
+      "tx": "0x38022fc6a582772babe7a6c8b0c52bddccb7ff6625be0db910d222df44bf9f1b"
     },
     {
       "idx": 2,
       "actor": "A",
-      "nonce": 51,
+      "nonce": 138,
       "call": "revoke(bRules)",
-      "to": "0x6d0d5a589cdbd07c432c1874f11df3804b309fd0",
-      "block": 12091032,
-      "gasUsed": 165926,
-      "tx": "0x5b97bb0bd110fcb7aa7855cf8182769dde3869ccd88e46cea01fe3fc7cb9f256"
+      "to": "0xa6242197f6dbd8a8cf8753742b7e0168ee617a83",
+      "block": 12131645,
+      "gasUsed": 166563,
+      "tx": "0xcf32034c48abb0873a14340609fbf19c0d803a1e7c04477585f269bf82774d5f"
     },
     {
       "idx": 3,
       "actor": "A",
-      "nonce": 52,
+      "nonce": 139,
       "call": "recordDisclosure(room, RESTRICTED, summary)",
-      "to": "0x59c42e471c823a874d7d8e1820df0a643c340d17",
-      "block": 12091032,
-      "gasUsed": 588284,
-      "tx": "0x6acbb08b675f64e085e6edf09100f0ecac2685eb0143e140b788bacbb758797d"
+      "to": "0xb10b4c241b9a4fef05ac9d33d8b6c09d7a91ab6e",
+      "block": 12131645,
+      "gasUsed": 589166,
+      "tx": "0x00eaab0bba9b410801225d1b2f002ca5815b971e36286e3b8c85b34075e6ce61"
     },
     {
       "idx": 5,
       "actor": "B",
-      "nonce": 9,
+      "nonce": 28,
       "call": "anchor(tender, SUPERSEDE: reveal of B's bid)",
-      "to": "0xccdf6647c90e8c3ec382ef2c46fa2be3a74bcd08",
-      "block": 12091036,
-      "gasUsed": 980273,
-      "tx": "0xbaf602dd8e3248129e8ab4f040378b426db5383c7bf05096517fd948943f6105"
+      "to": "0x74d5add218c3a33825ad3e450173960a1e4fad5c",
+      "block": 12131645,
+      "gasUsed": 980929,
+      "tx": "0x4aa27986998dbec783115c94af50be096ee3afa75964efa6682defebf04c3e04"
     },
     {
       "idx": 6,
       "actor": "C",
-      "nonce": 3,
+      "nonce": 10,
       "call": "admit(talk, SUBMIT, openPredicate)",
-      "to": "0x6d0d5a589cdbd07c432c1874f11df3804b309fd0",
-      "block": 12091046,
-      "gasUsed": 1449815,
-      "tx": "0x98c7d10714e3f29279a3c55542201a14fb08f4d28754e4396346efa103eb0fac"
+      "to": "0xa6242197f6dbd8a8cf8753742b7e0168ee617a83",
+      "block": 12131645,
+      "gasUsed": 1450356,
+      "tx": "0x705893f6ecec2ec1ac521989334bb167db150434e1ef96f027ca7da9e4dcdbea"
     },
     {
       "idx": 7,
       "actor": "C",
-      "nonce": 4,
+      "nonce": 11,
       "call": "readmit(cObserver, openPredicate)",
-      "to": "0x6d0d5a589cdbd07c432c1874f11df3804b309fd0",
-      "block": 12091046,
-      "gasUsed": 346105,
-      "tx": "0xc4112af7903f2d0d72909a4acf7fe7392bd49de232a29ccc7f8966577c34c52d"
+      "to": "0xa6242197f6dbd8a8cf8753742b7e0168ee617a83",
+      "block": 12131645,
+      "gasUsed": 358227,
+      "tx": "0x284880f6c23443f8da71bcf585c888c0c64701dc07f17dbc8223a5ab602916e6"
     },
     {
       "idx": 8,
       "actor": "C",
-      "nonce": 5,
+      "nonce": 12,
       "call": "admit(rules, SUBMIT, allowlistPredicate(roster))",
-      "to": "0x6d0d5a589cdbd07c432c1874f11df3804b309fd0",
-      "block": 12091046,
-      "gasUsed": 1445875,
-      "tx": "0x169e64db3f041adf34900906cb41612a944537a82867db235550ea66bdf3ad15"
+      "to": "0xa6242197f6dbd8a8cf8753742b7e0168ee617a83",
+      "block": 12131656,
+      "gasUsed": 1446879,
+      "tx": "0xbda45c637f6984f9179bcb3d02dd0a9a26d37d40b26ddb491f3a0aab3deac15c"
     },
     {
       "idx": 9,
       "actor": "C",
-      "nonce": 6,
+      "nonce": 13,
       "call": "anchor(tender, SUPERSEDE: reveal of C's bid)",
-      "to": "0xccdf6647c90e8c3ec382ef2c46fa2be3a74bcd08",
-      "block": 12091046,
-      "gasUsed": 980261,
-      "tx": "0x0b91ade9b5b06aafd8a74100728e5398679f014cfe385f121ca0a95514ccc997"
+      "to": "0x74d5add218c3a33825ad3e450173960a1e4fad5c",
+      "block": 12131657,
+      "gasUsed": 980917,
+      "tx": "0x2fb23cfa2141b1152f9835371993f773a01add0835e694506f7e356fc311daf1"
     },
     {
       "idx": 4,
       "actor": "A",
-      "nonce": 53,
+      "nonce": 141,
       "call": "resolve(windowId 0)",
-      "to": "0x8ea02f7ca49e26d63689bd98bc026c13810a8664",
-      "block": 12091173,
-      "gasUsed": 51894,
-      "tx": "0x1269c2c572aedf9aa8b754fca03114f8f0dee5d4bd5a08eb5f45395963ec29f5"
+      "to": "0x82382184983abe091b2af8f20006553dcebb0981",
+      "block": 12131936,
+      "gasUsed": 55468,
+      "tx": "0xa51d24764ea572e85b0011c5258dd78239685069f9425c7308799ab88ba86f7d"
     }
   ],
+  "fundingBetweenParts": {
+    "actor": "A",
+    "nonce": 140,
+    "to": "C",
+    "valueWei": 5000000000000000,
+    "tx": "0x6f0886fc10e3757f5e11a9c970e882766a2cac503ffd621340706cac6abdb0ff",
+    "block": 12131655,
+    "gasUsed": 21000,
+    "note": "A tops up C with 0.005 ETH between the two parts of phase 2"
+  },
   "readOutsOnChain": {
     "beforeEffectiveAt": {
-      "stage": "before effectiveAt",
-      "head": 12090830,
-      "chainTime": 1794143964,
-      "evaluate(talk,B,SUBMIT)@effectiveAt-1": 0,
-      "evaluate(talk,B,SUBMIT)@now": 0,
-      "evaluate(rules,B,SUBMIT)@effectiveAt-1": 0,
-      "evaluate(rules,B,SUBMIT)@now": 0,
-      "previewAdmission(rules,C,SUBMIT,openPredicate)": "0 (SATISFIED; v1 still in force)",
-      "disclosureCount(room)": 1,
-      "isPending(bPanelist)@effectiveAt-1": false,
-      "isPending(bPanelist)@now": false,
-      "window(0)": {
-        "channel": "council",
+      "block": 12131392,
+      "chainTime": 1794638532,
+      "effectiveAt": 1794641402,
+      "evaluate_B_talk_SUBMIT": {
+        "effectiveAt-1": 0,
+        "now": 0
+      },
+      "evaluateWithBinding_B_talk_SUBMIT": {
+        "effectiveAt-1": [
+          0,
+          "0x183a31355f56ee7c25f2c22f49f35fed52aca99867c505166326f0a7c4f585aa"
+        ],
+        "now": [
+          0,
+          "0x183a31355f56ee7c25f2c22f49f35fed52aca99867c505166326f0a7c4f585aa"
+        ]
+      },
+      "evaluate_B_rules_SUBMIT": {
+        "effectiveAt-1": 0,
+        "now": 0
+      },
+      "evaluate_C_talk_SUBMIT": {
+        "effectiveAt-1": 1,
+        "now": 1
+      },
+      "evaluate_C_rules_SUBMIT": {
+        "effectiveAt-1": 1,
+        "now": 1
+      },
+      "isPending_bPanelist": {
+        "effectiveAt-1": false,
+        "now": false
+      },
+      "isPending_cObserver": {
+        "effectiveAt-1": false,
+        "now": false
+      },
+      "previewAdmission_C_rules_openPredicate": 0,
+      "previewAdmission_B_link_allowlist": {
+        "gas500000": "revert AIFP_InsufficientGas 0xc9b4ddbd",
+        "gas1000000": "revert AIFP_InsufficientGas 0xc9b4ddbd",
+        "gas1100000": "revert AIFP_InsufficientGas 0xc9b4ddbd",
+        "gas1200000": 0,
+        "gas3000000": 0,
+        "eth_estimateGas": 1113138
+      },
+      "disclosureCount_room": 1,
+      "stateChanges_council": 0,
+      "currentParadigm_talk": [
+        "0xcb06318a54ca98e10d45f692fdb5f74e7da1a94c58400844edc80f1ea90df050",
+        1794637788
+      ],
+      "paradigmAt_talk": {
+        "effectiveAt-1": "0xcb06318a54ca98e10d45f692fdb5f74e7da1a94c58400844edc80f1ea90df050",
+        "now": "0xcb06318a54ca98e10d45f692fdb5f74e7da1a94c58400844edc80f1ea90df050"
+      },
+      "window_0": {
+        "channelId": "0x57d38cc73e7f47527ed7eea75809ae02c800346ede921f46e36dc45b60b9d0bf",
         "objectionRole": 8,
-        "start": 1794145304,
-        "deadline": 1794148304,
-        "openedAt": 1794143148,
+        "start": 1794641402,
+        "deadline": 1794645002,
+        "openedAt": 1794637956,
         "objections": 0,
-        "status": "0 OPEN",
-        "integrityBroken": false
-      }
+        "status": 0,
+        "stateChangesAtOpen": 0
+      },
+      "integrityHolds_0": true,
+      "leafGasLimit": 1000000
     },
     "afterEffectiveAtBeforePhase2": {
-      "stage": "after effectiveAt, before phase 2",
-      "head": 12090940,
-      "chainTime": 1794145356,
-      "evaluate(talk,B,SUBMIT)@effectiveAt-1": 0,
-      "evaluate(talk,B,SUBMIT)@now": 2,
-      "evaluate(rules,B,SUBMIT)@effectiveAt-1": 0,
-      "evaluate(rules,B,SUBMIT)@now": 0,
-      "previewAdmission(rules,C,SUBMIT,openPredicate)": "REVERT AIFP_PredicateMismatch(0x9978da14..., 0xd9748b88...)",
-      "disclosureCount(room)": 1,
-      "isPending(bPanelist)@effectiveAt-1": false,
-      "isPending(bPanelist)@now": true
+      "block": 12131636,
+      "chainTime": 1794641496,
+      "effectiveAt": 1794641402,
+      "evaluate_B_talk_SUBMIT": {
+        "effectiveAt-1": 0,
+        "now": 2
+      },
+      "evaluateWithBinding_B_talk_SUBMIT": {
+        "effectiveAt-1": [
+          0,
+          "0x183a31355f56ee7c25f2c22f49f35fed52aca99867c505166326f0a7c4f585aa"
+        ],
+        "now": [
+          2,
+          "0x0"
+        ]
+      },
+      "evaluate_B_rules_SUBMIT": {
+        "effectiveAt-1": 0,
+        "now": 0
+      },
+      "evaluate_C_talk_SUBMIT": {
+        "effectiveAt-1": 1,
+        "now": 1
+      },
+      "evaluate_C_rules_SUBMIT": {
+        "effectiveAt-1": 1,
+        "now": 1
+      },
+      "isPending_bPanelist": {
+        "effectiveAt-1": false,
+        "now": true
+      },
+      "isPending_cObserver": {
+        "effectiveAt-1": false,
+        "now": true
+      },
+      "previewAdmission_C_rules_openPredicate": "revert AIFP_PredicateMismatch(0x156659696dc41671e5aec9073d0bb047f8608c96d664b3f18eeecea91e1313d8, 0xd9748b88542c28c751ee2cfb24a3b2ab8d9ce5e6f55c9df01f4a1a4bbf53a91e)",
+      "disclosureCount_room": 1,
+      "stateChanges_council": 0,
+      "currentParadigm_talk": [
+        "0x4254a4dfada1325d38c90062fac6480f0df9e5c59c3afb0fb4a043bd5bb95756",
+        1794641402
+      ],
+      "paradigmAt_talk": {
+        "effectiveAt-1": "0xcb06318a54ca98e10d45f692fdb5f74e7da1a94c58400844edc80f1ea90df050",
+        "now": "0x4254a4dfada1325d38c90062fac6480f0df9e5c59c3afb0fb4a043bd5bb95756"
+      },
+      "window_0": {
+        "status": 0,
+        "objections": 0,
+        "stateChangesAtOpen": 0
+      },
+      "integrityHolds_0": true
     },
     "afterPhase2": {
-      "head": 12091176,
-      "chainTime": 1794148428,
-      "evaluate(talk,B,SUBMIT)@effectiveAt-1": 0,
-      "evaluate(talk,B,SUBMIT)@now": 0,
-      "evaluate(rules,B,SUBMIT)@effectiveAt-1": 0,
-      "evaluate(rules,B,SUBMIT)@now": 1,
-      "evaluate(talk,C,SUBMIT)@effectiveAt-1": 1,
-      "evaluate(talk,C,SUBMIT)@now": 0,
-      "evaluate(rules,C,SUBMIT)@effectiveAt-1": 1,
-      "evaluate(rules,C,SUBMIT)@now": 0,
-      "isPending(bPanelist)@now": false,
-      "isPending(cObserver)@now": false,
-      "previewAdmission(rules,C,SUBMIT,openPredicate)": "REVERT AIFP_PredicateMismatch(0x9978da146c364c7dcf3482ff159aa4774b32593c0ded2869a6aa31aa89c0acd3, 0xd9748b88542c28c751ee2cfb24a3b2ab8d9ce5e6f55c9df01f4a1a4bbf53a91e)",
-      "disclosureCount(room)": 2,
-      "window(0).status": "1 DEFAULT_TRIGGERED",
-      "window(0).objections": 0,
-      "window(0).integrityBroken": false
+      "block": 12131939,
+      "chainTime": 1794645156,
+      "effectiveAt": 1794641402,
+      "evaluate_B_talk_SUBMIT": {
+        "effectiveAt-1": 0,
+        "now": 0
+      },
+      "evaluateWithBinding_B_talk_SUBMIT": {
+        "effectiveAt-1": [
+          0,
+          "0x183a31355f56ee7c25f2c22f49f35fed52aca99867c505166326f0a7c4f585aa"
+        ],
+        "now": [
+          0,
+          "0x183a31355f56ee7c25f2c22f49f35fed52aca99867c505166326f0a7c4f585aa"
+        ]
+      },
+      "evaluate_B_rules_SUBMIT": {
+        "effectiveAt-1": 0,
+        "now": 1
+      },
+      "evaluate_C_talk_SUBMIT": {
+        "effectiveAt-1": 1,
+        "now": 0
+      },
+      "evaluate_C_rules_SUBMIT": {
+        "effectiveAt-1": 1,
+        "now": 0
+      },
+      "isPending_bPanelist": {
+        "effectiveAt-1": false,
+        "now": false
+      },
+      "isPending_cObserver": {
+        "effectiveAt-1": false,
+        "now": false
+      },
+      "previewAdmission_C_rules_openPredicate": "revert AIFP_PredicateMismatch(0x156659696dc41671e5aec9073d0bb047f8608c96d664b3f18eeecea91e1313d8, 0xd9748b88542c28c751ee2cfb24a3b2ab8d9ce5e6f55c9df01f4a1a4bbf53a91e)",
+      "disclosureCount_room": 2,
+      "stateChanges_council": 0,
+      "currentParadigm_talk": [
+        "0x4254a4dfada1325d38c90062fac6480f0df9e5c59c3afb0fb4a043bd5bb95756",
+        1794641402
+      ],
+      "paradigmAt_talk": {
+        "effectiveAt-1": "0xcb06318a54ca98e10d45f692fdb5f74e7da1a94c58400844edc80f1ea90df050",
+        "now": "0x4254a4dfada1325d38c90062fac6480f0df9e5c59c3afb0fb4a043bd5bb95756"
+      },
+      "window_0": {
+        "status": 1,
+        "objections": 0,
+        "stateChangesAtOpen": 0
+      },
+      "integrityHolds_0": true,
+      "finalNonces": {
+        "A": 142,
+        "B": 29,
+        "C": 14
+      },
+      "finalBalancesEth": {
+        "A": 0.00329,
+        "B": 0.00219,
+        "C": 0.00681
+      }
     }
   }
 }

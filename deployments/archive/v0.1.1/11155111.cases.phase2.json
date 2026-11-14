@@ -1,0 +1,227 @@
+{
+  "bLink": "0x010aa0b677b11cba7cb03c441ec9502a727502c85d0ceca9ce11fe6b77ec3deb",
+  "bPanelist": "0x6012786ecb4c8ad397cbef3e994c75eb9944452f84da21f230d4476e9b813435",
+  "bRules": "0xd21b433e9c9e0435fd50cd284b8cdeb063f44739288d8a6a3cf2ca03c8e2e9c2",
+  "bulletin": "0x2205ce271f37fd067aa550b01cc7ed69689964c8c571dffb077c23d1a931a762",
+  "cObserver": "0xe7000bfd917ebea405cd0437282b1844a05db8b451040d1b2bc1db6e3fef9c66",
+  "commitB": "0x462bda5f7b2ebf9b097874d8394d013ec6151cb2074e3d85e042a86625fd6c09",
+  "commitC": "0x863f5ecf9869adffbb4fb22f562bd78b8c9c6d85362d9b56726611323d2ab624",
+  "council": "0x9e71699a3163c80e7cfd5ae56d475aa3b66eaa133946b0b679bbc466e91bfa0a",
+  "effectiveAt": 1794145304,
+  "link": "0x490aa495c1dc62bf0858057cd6b0dec27f706cf7983f61de907d3cc19bd2dd41",
+  "pClub": "0x4254a4dfada1325d38c90062fac6480f0df9e5c59c3afb0fb4a043bd5bb95756",
+  "pDirect": "0xd7168efb3d8f279af80b501e30dfb52087d9c3935e567cb2137de404f6fb842b",
+  "pIntake": "0xaa1d4316be67a70ced10be7aba38e533bd32c60a534b67d56c4dfd7caad38855",
+  "pMeeting": "0x5dd42e45e5e9f35ab316cd89ed86819434d801470c8194c73219df8edf23642e",
+  "pPanel": "0xcb06318a54ca98e10d45f692fdb5f74e7da1a94c58400844edc80f1ea90df050",
+  "pRulesV1": "0x3ae478fc3e1273c59b423c749433b1c76e0102f0e4bd148b06f9b8558e17dc68",
+  "pRulesV2": "0x7b22ee5725aff9b7a29895b0d4615caf01c7a5f19de95be0b4a847b8cef1eb74",
+  "pSource": "0x63b5393efec8a54ac1320a0d14ac4cf86d8089cade6c52092e96a5e2d6be95f7",
+  "phase1At": 1794143256,
+  "postA": "0x52a99c6f1507bd8fe1a3e8e4d0bbaba81c01d1f50c961a8f33325508c61bd821",
+  "room": "0xdbf12ca5fcc2a99bad1ebaaf8cf384d7287d7ea0069755dc8629224b289ee305",
+  "rules": "0x949a6415d9ef47d5c28becf0648203fa5f52b84f610d3a8bccc343eff4f7dec5",
+  "summary": "0xac34604414853e39ac207c4b2f72076d795c86cb91ca4fd08d4b11afc7c5a7b9",
+  "talk": "0xd4ed20b8de9ec893278997f621828dd98568f7794899dec11961ae14f30f858a",
+  "tender": "0xd4d27fe9c51faecc55655567f501ca6e62f7706df641fb6e2f44e5bd3a6284ca",
+  "windowDeadline": 1794148304,
+  "windowId": 0,
+  "phase1Blocks": {
+    "A": [
+      12090759,
+      12090766
+    ],
+    "B": [
+      12090772
+    ],
+    "C": [
+      12090775
+    ]
+  },
+  "actors": {
+    "A": "0xfaf78B3D533411Bb921d119a9881C04060869065",
+    "B": "0x70C8e57fF73E36761127d28Ed29D8f8cfB9831b6",
+    "C": "0x863D46f2c932122bAc1032A4b41b4C29d99229DC"
+  },
+  "cSubmit": "0x3e1f6bbcaf22dc52a55e5d06a3773ecda89a5ab19ea53c53fc32a10422c0154d",
+  "cRules": "0x8b89a80e133d24e36468a8bd9f810f056cad6a83af87f0c4df2e02000e6dfd62",
+  "windowStatus": 1,
+  "case4.bPendingBeforeConfirm": 2,
+  "case4.bHistoryBeforeChange": 0,
+  "case8.oldRuleRejectedAfterChange": 1,
+  "case8.bHistoryUnderV1": 0,
+  "case8.bNowAfterRevocation": 1,
+  "case9.disclosureRecords": 2,
+  "phase2At": 1794148380,
+  "phase2Blocks": {
+    "A": [
+      12091032,
+      12091173
+    ],
+    "B": [
+      12091036
+    ],
+    "C": [
+      12091046
+    ]
+  },
+  "phase2Transactions": [
+    {
+      "idx": 0,
+      "actor": "A",
+      "nonce": 49,
+      "call": "confirmReadmission(bPanelist)",
+      "to": "0x6d0d5a589cdbd07c432c1874f11df3804b309fd0",
+      "block": 12091032,
+      "gasUsed": 314613,
+      "tx": "0x2c90ee75144a8233cb289b2331a79488aab74fa44dbbf75b953e8bdc895c486d"
+    },
+    {
+      "idx": 1,
+      "actor": "A",
+      "nonce": 50,
+      "call": "roster.add(C)",
+      "to": "0x4d72639cb1044091e8136105c7e6381ac973ae3a",
+      "block": 12091032,
+      "gasUsed": 141817,
+      "tx": "0x14d1b290546dc6141cb6a47448336ed3c78b21708da2681aada6ae412a009d3e"
+    },
+    {
+      "idx": 2,
+      "actor": "A",
+      "nonce": 51,
+      "call": "revoke(bRules)",
+      "to": "0x6d0d5a589cdbd07c432c1874f11df3804b309fd0",
+      "block": 12091032,
+      "gasUsed": 165926,
+      "tx": "0x5b97bb0bd110fcb7aa7855cf8182769dde3869ccd88e46cea01fe3fc7cb9f256"
+    },
+    {
+      "idx": 3,
+      "actor": "A",
+      "nonce": 52,
+      "call": "recordDisclosure(room, RESTRICTED, summary)",
+      "to": "0x59c42e471c823a874d7d8e1820df0a643c340d17",
+      "block": 12091032,
+      "gasUsed": 588284,
+      "tx": "0x6acbb08b675f64e085e6edf09100f0ecac2685eb0143e140b788bacbb758797d"
+    },
+    {
+      "idx": 5,
+      "actor": "B",
+      "nonce": 9,
+      "call": "anchor(tender, SUPERSEDE: reveal of B's bid)",
+      "to": "0xccdf6647c90e8c3ec382ef2c46fa2be3a74bcd08",
+      "block": 12091036,
+      "gasUsed": 980273,
+      "tx": "0xbaf602dd8e3248129e8ab4f040378b426db5383c7bf05096517fd948943f6105"
+    },
+    {
+      "idx": 6,
+      "actor": "C",
+      "nonce": 3,
+      "call": "admit(talk, SUBMIT, openPredicate)",
+      "to": "0x6d0d5a589cdbd07c432c1874f11df3804b309fd0",
+      "block": 12091046,
+      "gasUsed": 1449815,
+      "tx": "0x98c7d10714e3f29279a3c55542201a14fb08f4d28754e4396346efa103eb0fac"
+    },
+    {
+      "idx": 7,
+      "actor": "C",
+      "nonce": 4,
+      "call": "readmit(cObserver, openPredicate)",
+      "to": "0x6d0d5a589cdbd07c432c1874f11df3804b309fd0",
+      "block": 12091046,
+      "gasUsed": 346105,
+      "tx": "0xc4112af7903f2d0d72909a4acf7fe7392bd49de232a29ccc7f8966577c34c52d"
+    },
+    {
+      "idx": 8,
+      "actor": "C",
+      "nonce": 5,
+      "call": "admit(rules, SUBMIT, allowlistPredicate(roster))",
+      "to": "0x6d0d5a589cdbd07c432c1874f11df3804b309fd0",
+      "block": 12091046,
+      "gasUsed": 1445875,
+      "tx": "0x169e64db3f041adf34900906cb41612a944537a82867db235550ea66bdf3ad15"
+    },
+    {
+      "idx": 9,
+      "actor": "C",
+      "nonce": 6,
+      "call": "anchor(tender, SUPERSEDE: reveal of C's bid)",
+      "to": "0xccdf6647c90e8c3ec382ef2c46fa2be3a74bcd08",
+      "block": 12091046,
+      "gasUsed": 980261,
+      "tx": "0x0b91ade9b5b06aafd8a74100728e5398679f014cfe385f121ca0a95514ccc997"
+    },
+    {
+      "idx": 4,
+      "actor": "A",
+      "nonce": 53,
+      "call": "resolve(windowId 0)",
+      "to": "0x8ea02f7ca49e26d63689bd98bc026c13810a8664",
+      "block": 12091173,
+      "gasUsed": 51894,
+      "tx": "0x1269c2c572aedf9aa8b754fca03114f8f0dee5d4bd5a08eb5f45395963ec29f5"
+    }
+  ],
+  "readOutsOnChain": {
+    "beforeEffectiveAt": {
+      "stage": "before effectiveAt",
+      "head": 12090830,
+      "chainTime": 1794143964,
+      "evaluate(talk,B,SUBMIT)@effectiveAt-1": 0,
+      "evaluate(talk,B,SUBMIT)@now": 0,
+      "evaluate(rules,B,SUBMIT)@effectiveAt-1": 0,
+      "evaluate(rules,B,SUBMIT)@now": 0,
+      "previewAdmission(rules,C,SUBMIT,openPredicate)": "0 (SATISFIED; v1 still in force)",
+      "disclosureCount(room)": 1,
+      "isPending(bPanelist)@effectiveAt-1": false,
+      "isPending(bPanelist)@now": false,
+      "window(0)": {
+        "channel": "council",
+        "objectionRole": 8,
+        "start": 1794145304,
+        "deadline": 1794148304,
+        "openedAt": 1794143148,
+        "objections": 0,
+        "status": "0 OPEN",
+        "integrityBroken": false
+      }
+    },
+    "afterEffectiveAtBeforePhase2": {
+      "stage": "after effectiveAt, before phase 2",
+      "head": 12090940,
+      "chainTime": 1794145356,
+      "evaluate(talk,B,SUBMIT)@effectiveAt-1": 0,
+      "evaluate(talk,B,SUBMIT)@now": 2,
+      "evaluate(rules,B,SUBMIT)@effectiveAt-1": 0,
+      "evaluate(rules,B,SUBMIT)@now": 0,
+      "previewAdmission(rules,C,SUBMIT,openPredicate)": "REVERT AIFP_PredicateMismatch(0x9978da14..., 0xd9748b88...)",
+      "disclosureCount(room)": 1,
+      "isPending(bPanelist)@effectiveAt-1": false,
+      "isPending(bPanelist)@now": true
+    },
+    "afterPhase2": {
+      "head": 12091176,
+      "chainTime": 1794148428,
+      "evaluate(talk,B,SUBMIT)@effectiveAt-1": 0,
+      "evaluate(talk,B,SUBMIT)@now": 0,
+      "evaluate(rules,B,SUBMIT)@effectiveAt-1": 0,
+      "evaluate(rules,B,SUBMIT)@now": 1,
+      "evaluate(talk,C,SUBMIT)@effectiveAt-1": 1,
+      "evaluate(talk,C,SUBMIT)@now": 0,
+      "evaluate(rules,C,SUBMIT)@effectiveAt-1": 1,
+      "evaluate(rules,C,SUBMIT)@now": 0,
+      "isPending(bPanelist)@now": false,
+      "isPending(cObserver)@now": false,
+      "previewAdmission(rules,C,SUBMIT,openPredicate)": "REVERT AIFP_PredicateMismatch(0x9978da146c364c7dcf3482ff159aa4774b32593c0ded2869a6aa31aa89c0acd3, 0xd9748b88542c28c751ee2cfb24a3b2ab8d9ce5e6f55c9df01f4a1a4bbf53a91e)",
+      "disclosureCount(room)": 2,
+      "window(0).status": "1 DEFAULT_TRIGGERED",
+      "window(0).objections": 0,
+      "window(0).integrityBroken": false
+    }
+  }
+}

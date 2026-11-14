@@ -31,7 +31,7 @@ bounded depth and a decided composite stops evaluating; event records and manage
 them; an objection window confirms its integrity instead of presuming it. Ethereum
 Magicians thread
 [ERC-8489: Agent Information Flow Paradigm](https://ethereum-magicians.org/t/erc-8489-agent-information-flow-paradigm/30300)
-and ethereum/ERCs pull request [#2152](https://github.com/ethereum/ERCs/pull/2152) open; the v0.1.1 reference
+and ethereum/ERCs pull request [#2152](https://github.com/ethereum/ERCs/pull/2152) open; the v0.1.3 reference
 stack is deployed on Sepolia with the boundary-case evidence run recorded in
 [`docs/sepolia-evidence.md`](docs/sepolia-evidence.md).
 
@@ -126,20 +126,19 @@ Sepolia (chain id 11155111), deployed from the build described in `foundry.toml`
 hashes, gas, runtime code hashes and the two-phase boundary-case run in
 [`docs/sepolia-evidence.md`](docs/sepolia-evidence.md) and `deployments/11155111*.json`.
 
-These addresses are the v0.1.1 build. v0.1.2 and v0.1.3 changed `AIFPCompositeVerifier`,
-`AIFPParticipationRegistry`, `AIFPChannelRegistry`, `AIFPEventAnchor` and `AIFPObjectionWindow` (see
-`docs/design-memo.md`, section 8); the stack will be redeployed and the evidence run repeated once the current
-review round has settled, and this table replaced then.
+These addresses are the v0.1.3 build (the contracts as filed with ERC-8489 after the second review round). The
+v0.1.1 stack deployed on 2026-11-08 remains on chain and its record is kept in
+[`docs/sepolia-evidence-v0.1.1.md`](docs/sepolia-evidence-v0.1.1.md).
 
 | Contract | Address |
 | --- | --- |
-| `AIFPParadigmRegistry` | `0xe5CC5dc02D282Ca1A980Ed586b509Ac9144Dd985` |
-| `AIFPCompositeVerifier` | `0x0Eb8923fdc4E3e60E2252B62A139582C824A5226` |
-| `AIFPChannelRegistry` | `0x59c42e471c823a874d7d8E1820DF0A643c340d17` |
-| `AIFPParticipationRegistry` | `0x6d0d5A589cdBd07C432C1874f11dF3804b309fd0` |
-| `AIFPEventAnchor` | `0xCcdf6647c90E8C3eC382eF2C46fa2Be3a74bCd08` |
-| `AIFPObjectionWindow` | `0x8ea02f7ca49E26D63689Bd98bc026C13810a8664` |
-| `AIFPSubjectSet` (roster used by the cases) | `0x4D72639CB1044091E8136105c7E6381ac973aE3A` |
+| `AIFPParadigmRegistry` | `0x8bE1cF22C1f1ff6921652d84DF830a90b23C8633` |
+| `AIFPCompositeVerifier` | `0xc577aC8316d8D6bf8edb77b15b690Ca7cC185a5C` |
+| `AIFPChannelRegistry` | `0xb10b4c241B9a4feF05aC9d33d8B6c09D7A91aB6e` |
+| `AIFPParticipationRegistry` | `0xA6242197F6DBD8A8CF8753742B7E0168EE617A83` |
+| `AIFPEventAnchor` | `0x74d5AdD218C3A33825AD3e450173960a1E4FAd5c` |
+| `AIFPObjectionWindow` | `0x82382184983ABe091b2Af8f20006553DCeBB0981` |
+| `AIFPSubjectSet` (roster used by the cases) | `0xDE93b6b9245eF5ec352ADdFDbC1b1a2B702b755C` |
 
 ## Authors and contributors
 

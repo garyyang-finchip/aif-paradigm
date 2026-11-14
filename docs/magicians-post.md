@@ -503,3 +503,57 @@ All three narrowings are right, and they are now in the text, nothing else chang
 
 In the repository and in PR #2152. Sepolia next: I will redeploy the v0.1.3 stack and rerun the evidence cases,
 and post the record here.
+
+## Reply: Sepolia evidence, v0.1.3 (thirteenth post; reply of 2026-11-14)
+
+The twelfth post (SergeevDmitry, 2026-11-13) closed the management-events point: with `by`, `authorityKind` and
+`authorizingBinding` in the logs an indexer can check the manager's authority at the point of the grant without a
+state read. Nothing was left open except the Sepolia redeployment promised in the eleventh post. The v0.1.3 stack
+was deployed on 2026-11-14 (deployer nonces 95 to 102) and the two-phase evidence run repeated on it; a first relay
+earlier that day overran `AIFP_DELAY` and was abandoned, which the record and the runbook describe.
+
+Reply:
+
+---
+
+**Sepolia, v0.1.3.** The stack as it stands in PR #2152 is deployed on Sepolia and the two-phase evidence run
+(boundary cases 1, 4, 5, 8, 9 and 11, three actors) was repeated on it. Transactions, gas, runtime code hashes
+and read-outs are in
+[`docs/sepolia-evidence.md`](https://github.com/garyyang-finchip/aif-paradigm/blob/main/docs/sepolia-evidence.md)
+and `deployments/11155111*.json`; the v0.1.1 deployment of 2026-11-08 stays on chain, its record moved to
+`docs/sepolia-evidence-v0.1.1.md`.
+
+- `AIFPParadigmRegistry` `0x8bE1cF22C1f1ff6921652d84DF830a90b23C8633`
+- `AIFPChannelRegistry` `0xb10b4c241B9a4feF05aC9d33d8B6c09D7A91aB6e`
+- `AIFPParticipationRegistry` `0xA6242197F6DBD8A8CF8753742B7E0168EE617A83`
+- `AIFPCompositeVerifier` `0xc577aC8316d8D6bf8edb77b15b690Ca7cC185a5C`
+- `AIFPEventAnchor` `0x74d5AdD218C3A33825AD3e450173960a1E4FAd5c`, `AIFPObjectionWindow`
+  `0x82382184983ABe091b2Af8f20006553DCeBB0981`
+
+What the run adds to the earlier record, in the terms of this thread:
+
+- **Gas decides whether an evaluation happens, not what it says** (posts 4 and 10). `previewAdmission` of an
+  allowlist admission (one external leaf) reverts with `AIFP_InsufficientGas` under a gas limit of 500,000,
+  1,000,000 or 1,100,000 and returns SATISFIED under 1,200,000; `eth_estimateGas` finds 1,113,138, the leaf
+  bound plus the margin plus the work before the leaf. Nothing is recorded in between. A preview with no
+  external leaf answers the same under every limit. Operational consequence, now in the runbook: Foundry's
+  default broadcast estimate (130 percent of consumed gas) is below the check, so the case transactions were
+  sent with `--gas-estimate-multiplier 400` / a 3,000,000 limit.
+- **Decisions within a timepoint are auditable from the logs** (posts 5, 8 and 12). Every `RoleGranted` of the
+  run ends with `by`, `authorityKind` and `authorizingBinding`: B's self-admission in the link names B,
+  `AUTHORITY_SUBJECT` (3) and no binding; A's grants name A and `AUTHORITY_CHANNEL` (0); every `EventAnchored`
+  carries the `bindingId` under which the publisher wrote, and `evaluateWithBinding` returns that identifier at
+  the earlier timepoint while answering `(UNDETERMINABLE, 0x0)` at the present one while the re-admission was
+  pending.
+- **History is a pure function of registry state.** B evaluated at `effectiveAt - 1` under the panel answers
+  SATISFIED after the club adoption while the present timepoint answers UNDETERMINABLE until
+  `confirmReadmission`, then SATISFIED again under the same binding identifier; the replayed v1 predicate is
+  rejected by hash (`AIFP_PredicateMismatch`), not recorded as NOT_SATISFIED; the DISCLOSED record is followed
+  by a RESTRICTED record and both remain.
+- **The objection window confirms integrity instead of presuming it** (review item 13). `stateChanges(council)`
+  read 0 when the window opened and 0 when it was resolved, so `resolve` returned DEFAULT_TRIGGERED with zero
+  objections; a freeze in between would have made it UNDETERMINABLE.
+
+Sealed bids were committed in phase 1 and revealed in phase 2 as superseding anchors, as before. The metadata
+hashes of the seven deployed runtimes match the repository build; Sourcify submission is pending a route to it
+from the run environment (the commands are in the record).
