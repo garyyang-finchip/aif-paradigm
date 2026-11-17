@@ -99,5 +99,62 @@
       "runtimeBytes": 1038,
       "runtimeKeccak256": "0x8c58e4175a9e3233b6691fd183225e817e03f5785c8a931a692334544cbc5b8c"
     }
-  ]
+  ],
+  "verification": {
+    "script": "tools/verify-deployment.mjs",
+    "method": "runtime code compared byte for byte with the forge artifact after zeroing deployedBytecode.immutableReferences on both sides; immutable words and their getters compared with the addresses in this file",
+    "checkedAtBlock": 12154613,
+    "result": "all seven contracts pass",
+    "sourcify": {
+      "AIFPChannelRegistry": {
+        "match": "exact_match",
+        "creationMatch": "exact_match",
+        "runtimeMatch": "exact_match",
+        "verifiedAt": "2026-11-17T13:16:02Z",
+        "url": "https://sourcify.dev/server/v2/contract/11155111/0xb10b4c241B9a4feF05aC9d33d8B6c09D7A91aB6e"
+      },
+      "AIFPCompositeVerifier": {
+        "match": "exact_match",
+        "creationMatch": "exact_match",
+        "runtimeMatch": "exact_match",
+        "verifiedAt": "2026-11-17T13:16:05Z",
+        "url": "https://sourcify.dev/server/v2/contract/11155111/0xc577aC8316d8D6bf8edb77b15b690Ca7cC185a5C"
+      },
+      "AIFPEventAnchor": {
+        "match": "exact_match",
+        "creationMatch": "exact_match",
+        "runtimeMatch": "exact_match",
+        "verifiedAt": "2026-11-17T13:16:07Z",
+        "url": "https://sourcify.dev/server/v2/contract/11155111/0x74d5AdD218C3A33825AD3e450173960a1E4FAd5c"
+      },
+      "AIFPObjectionWindow": {
+        "match": "exact_match",
+        "creationMatch": "exact_match",
+        "runtimeMatch": "exact_match",
+        "verifiedAt": "2026-11-17T13:16:08Z",
+        "url": "https://sourcify.dev/server/v2/contract/11155111/0x82382184983ABe091b2Af8f20006553DCeBB0981"
+      },
+      "AIFPParadigmRegistry": {
+        "match": "exact_match",
+        "creationMatch": "exact_match",
+        "runtimeMatch": "exact_match",
+        "verifiedAt": "2026-11-17T13:16:09Z",
+        "url": "https://sourcify.dev/server/v2/contract/11155111/0x8bE1cF22C1f1ff6921652d84DF830a90b23C8633"
+      },
+      "AIFPParticipationRegistry": {
+        "match": "exact_match",
+        "creationMatch": "exact_match",
+        "runtimeMatch": "exact_match",
+        "verifiedAt": "2026-11-17T13:16:11Z",
+        "url": "https://sourcify.dev/server/v2/contract/11155111/0xA6242197F6DBD8A8CF8753742B7E0168EE617A83"
+      },
+      "AIFPSubjectSet": {
+        "match": "exact_match",
+        "creationMatch": "exact_match",
+        "runtimeMatch": "exact_match",
+        "verifiedAt": "2026-11-17T13:16:12Z",
+        "url": "https://sourcify.dev/server/v2/contract/11155111/0xDE93b6b9245eF5ec352ADdFDbC1b1a2B702b755C"
+      }
+    }
+  }
 }

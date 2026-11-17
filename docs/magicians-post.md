@@ -557,3 +557,57 @@ What the run adds to the earlier record, in the terms of this thread:
 Sealed bids were committed in phase 1 and revealed in phase 2 as superseding anchors, as before. The metadata
 hashes of the seven deployed runtimes match the repository build; Sourcify submission is pending a route to it
 from the run environment (the commands are in the record).
+
+## Review of the build check (fourteenth post, Zealynx, 2026-11-14) and the reply of the same day (fifteenth post)
+
+The fourteenth post: the build check in the Sepolia record compared only the CBOR metadata hash at the tail of
+the runtime, which pins sources and compiler settings but neither compares the code in front of it nor covers the
+immutables (`channelRegistry`, `paradigmRegistry` and `verifier` in the participation registry, `deployer` in the
+channel registry), so a deployment wired to a different verifier would pass. Proposed: compare the whole
+`deployedBytecode` with the `immutableReferences` ranges zeroed on the deployed side, then read `verifier()`,
+`channelRegistry()`, `paradigmRegistry()` and `deployer()` back against the table. The fifteenth post (posted
+directly, 2026-11-14) agreed and promised the rewritten step 1, the script in the repository, the readings in the
+thread and the Sourcify submission alongside, with the zeroed-range comparison kept as the check that does not
+depend on a third party.
+
+## Reply with the verification readings (sixteenth post; reply of 2026-11-17)
+
+Done on 2026-11-17: `tools/verify-deployment.mjs` (full-code comparison with the immutable ranges zeroed, decoded
+immutables, getter read-backs, keccak256 against the record), its readings in `docs/sepolia-evidence.md`, and the
+Sourcify verification of all seven contracts (`exact_match`, creation and runtime).
+
+Reply:
+
+---
+
+@Zealynx the rewritten check is in the repository as `tools/verify-deployment.mjs` (Node 18+, no dependencies,
+after `forge build`), and the record in
+[`docs/sepolia-evidence.md`](https://github.com/garyyang-finchip/aif-paradigm/blob/main/docs/sepolia-evidence.md)
+now carries its readings. For each of the seven contracts in `deployments/11155111.json` it fetches the runtime
+code, zeroes the ranges listed in the artifact's `deployedBytecode.immutableReferences` on both sides, compares
+the full bytecode byte for byte (metadata tail included), decodes the immutable words baked into the deployed
+code, reads the getters that expose them, and checks the keccak256 of the deployed runtime against the record.
+It exits non-zero on any difference; a record that names the v0.1.1 verifier fails twice (`verifier()` returns
+the deployed one, and the baked word is unaccounted for).
+
+Readings on Sepolia at block 12154613, every check passing:
+
+- `AIFPParticipationRegistry` (18 immutable ranges): words `0xb10b…aB6e` x14, `0x8bE1…8633` x2, `0xc577…85a5C`
+  x2; `channelRegistry()` → `0xb10b4c241B9a4feF05aC9d33d8B6c09D7A91aB6e`, `paradigmRegistry()` →
+  `0x8bE1cF22C1f1ff6921652d84DF830a90b23C8633`, `verifier()` → `0xc577aC8316d8D6bf8edb77b15b690Ca7cC185a5C`.
+- `AIFPChannelRegistry` (5 ranges): `paradigmRegistry()` → `0x8bE1…8633`, `deployer()` →
+  `0xfaf78B3D533411Bb921d119a9881C04060869065` (A); `participationRegistry()` (storage, set after deployment) →
+  `0xA6242197…7A83`.
+- `AIFPEventAnchor` (5) and `AIFPObjectionWindow` (6): `channelRegistry()` → `0xb10b…aB6e`,
+  `participationRegistry()` → `0xA6242197F6DBD8A8CF8753742B7E0168EE617A83`.
+- `AIFPParadigmRegistry`, `AIFPCompositeVerifier`, `AIFPSubjectSet`: no immutables; code equal to the build as
+  deployed; `owner()` of the roster → A.
+
+With the ranges zeroed, all seven runtimes equal the local build; the keccak256 values of the deployed code in
+the record are unchanged.
+
+Sourcify is done as well: all seven verified on 2026-11-17 from the sources at `main`, `exact_match` for
+creation and runtime code (for example
+https://sourcify.dev/server/v2/contract/11155111/0xA6242197F6DBD8A8CF8753742B7E0168EE617A83; the full table is
+in the record). The zeroed-range comparison stays in the document as the primary check, Sourcify as the second
+one, as agreed.

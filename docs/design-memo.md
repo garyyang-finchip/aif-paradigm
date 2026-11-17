@@ -371,4 +371,7 @@ Noted in this round and left alone, as candidates for the next one:
   needs more gas than any chain carries.
 
 The v0.1.3 stack is deployed on Sepolia and the evidence run was repeated on it (`docs/sepolia-evidence.md`); the
-v0.1.1 deployment of 2026-11-08 stays on chain, its record moved to `docs/sepolia-evidence-v0.1.1.md`.
+v0.1.1 deployment of 2026-11-08 stays on chain, its record moved to `docs/sepolia-evidence-v0.1.1.md`. The build
+check of the record compares the full runtime code with the immutable ranges zeroed and reads the immutables'
+getters back (`tools/verify-deployment.mjs`, after the thread's fourteenth post noted that the metadata hash alone
+does not cover constructor arguments); Sourcify reports `exact_match` for all seven contracts.

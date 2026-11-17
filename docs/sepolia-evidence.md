@@ -17,7 +17,7 @@ this document are included with status `0x1` unless stated otherwise.
 | --- | --- |
 | Source | this repository, `assets/erc-aifp/contracts/` as filed with ERC-8489 after the second review round (v0.1.3; `assets/erc-8489/contracts/` in ethereum/ERCs). Relative to the v0.1.1 deployment: leaf calls judged on raw return data with a fixed gas bound (`leafGasLimit()` = 1,000,000) and a pre-call headroom check (`AIFP_InsufficientGas`), no outcome for an evaluation that did not complete (`AIFP_EvaluationFailed`), tree-shaped predicates of bounded depth, `evaluateWithBinding`, `bindingId` in event records, management events naming caller, authority kind and authorizing binding, `previewAdmission` mirroring `admit`, re-admission only in an Active channel, and an objection window that confirms integrity through `stateChanges` |
 | Compiler | solc 0.8.28, EVM version `cancun`, optimizer enabled with 200 runs, no IR pipeline (`foundry.toml`) |
-| Build check | the CBOR metadata hash at the end of each deployed runtime equals the one in the local `forge build` artifact for the same contract (seven of seven) |
+| Build check | `node tools/verify-deployment.mjs`: the runtime code of each of the seven contracts equals the local `forge build` artifact byte for byte once the ranges in the artifact's `deployedBytecode.immutableReferences` are zeroed on both sides (the CBOR metadata hash is part of that comparison), the immutables baked into the code and the getters that expose them (`verifier()`, `channelRegistry()`, `paradigmRegistry()`, `participationRegistry()`, `deployer()`, `owner()`) return the addresses in the table below, and Sourcify reports `exact_match` for creation and runtime code of all seven (see Reproducing). The first version of this record compared only the metadata hash, which does not cover the immutables; the thread's fourteenth post pointed this out |
 | Deployer / channel authority (A) | `0xfaf78B3D533411Bb921d119a9881C04060869065` |
 | Actor B | `0x70C8e57fF73E36761127d28Ed29D8f8cfB9831b6` |
 | Actor C | `0x863D46f2c932122bAc1032A4b41b4C29d99229DC` |
@@ -218,9 +218,51 @@ The sealed bids of B and C were revealed as anchors superseding the phase-1 comm
 
 ## Reproducing
 
-1. `forge build` with the repository's `foundry.toml`; compare the metadata hash at the tail of
-   `out/<Contract>.sol/<Contract>.json` `deployedBytecode` with `eth_getCode` of the addresses above.
-2. Verify sources with Sourcify from a machine with network access to it, one command per contract:
+1. `forge build` with the repository's `foundry.toml`, then
+
+```
+node tools/verify-deployment.mjs --rpc https://ethereum-sepolia-rpc.publicnode.com
+```
+
+   For every contract in `deployments/11155111.json` the script fetches the runtime code with `eth_getCode`,
+   zeroes the ranges listed in the artifact's `deployedBytecode.immutableReferences` on the deployed and on the
+   local side, compares the two byte for byte (the trailing CBOR metadata included), decodes the immutable words
+   baked into the deployed code, reads the getters that expose the constructor arguments back from chain and
+   compares both with the address table of the record, and recomputes keccak256 of the deployed runtime against
+   `runtimeKeccak256` in the record. It exits non-zero on any mismatch. The run of 2026-11-17 (block 12154613,
+   chain time 1794921096) passed every check:
+
+| Contract | Immutable ranges | Immutable words found in the deployed code | Getters read back from chain |
+| --- | --- | --- | --- |
+| `AIFPParadigmRegistry` | none | - | - |
+| `AIFPCompositeVerifier` | none | - | - |
+| `AIFPChannelRegistry` | 5 | `0x8be1cf22…c8633` (paradigm registry) x3, `0xfaf78b3d…9065` (A) x2 | `paradigmRegistry()` = `0x8bE1cF22…C8633`, `deployer()` = `0xfaf78B3D…9065`, `participationRegistry()` = `0xA6242197…7A83` |
+| `AIFPParticipationRegistry` | 18 | `0xb10b4c24…ab6e` (channel registry) x14, `0x8be1cf22…c8633` x2, `0xc577ac83…5a5c` (verifier) x2 | `channelRegistry()` = `0xb10b4c24…aB6e`, `paradigmRegistry()` = `0x8bE1cF22…C8633`, `verifier()` = `0xc577aC83…85a5C` |
+| `AIFPEventAnchor` | 5 | `0xb10b4c24…ab6e` x3, `0xa6242197…7a83` (participation registry) x2 | `channelRegistry()` = `0xb10b4c24…aB6e`, `participationRegistry()` = `0xA6242197…7A83` |
+| `AIFPObjectionWindow` | 6 | `0xb10b4c24…ab6e` x4, `0xa6242197…7a83` x2 | `channelRegistry()` = `0xb10b4c24…aB6e`, `participationRegistry()` = `0xA6242197…7A83` |
+| `AIFPSubjectSet` | none (owner is storage) | - | `owner()` = `0xfaf78B3D…9065` |
+
+   With the ranges zeroed, the deployed code of all seven equals the local build (keccak256 of the zeroed
+   participation registry `0xc3ede82c…4668`, channel registry `0x5ff08b7e…98a2`, event anchor `0xe1d5dbc4…39c7`,
+   objection window `0xca015da7…f7cd`; the three contracts without immutables keep the hashes of the table
+   above). A record that names a different verifier fails the check twice: `verifier()` returns the deployed
+   one, and the immutable word is not accounted for.
+
+2. Sourcify: all seven contracts were verified on 2026-11-17 from the sources at the repository's `main` with
+   the standard JSON settings of `foundry.toml` (solc 0.8.28+commit.7893614a, optimizer 200 runs, `cancun`,
+   `bytecodeHash: ipfs`); creation and runtime code both report `exact_match`.
+
+| Contract | Sourcify | Verified at (UTC) |
+| --- | --- | --- |
+| `AIFPParadigmRegistry` | [lookup](https://sourcify.dev/#/lookup/0x8bE1cF22C1f1ff6921652d84DF830a90b23C8633), [API](https://sourcify.dev/server/v2/contract/11155111/0x8bE1cF22C1f1ff6921652d84DF830a90b23C8633) | 2026-11-17 13:16:09 |
+| `AIFPCompositeVerifier` | [lookup](https://sourcify.dev/#/lookup/0xc577aC8316d8D6bf8edb77b15b690Ca7cC185a5C), [API](https://sourcify.dev/server/v2/contract/11155111/0xc577aC8316d8D6bf8edb77b15b690Ca7cC185a5C) | 2026-11-17 13:16:05 |
+| `AIFPChannelRegistry` | [lookup](https://sourcify.dev/#/lookup/0xb10b4c241B9a4feF05aC9d33d8B6c09D7A91aB6e), [API](https://sourcify.dev/server/v2/contract/11155111/0xb10b4c241B9a4feF05aC9d33d8B6c09D7A91aB6e) | 2026-11-17 13:16:02 |
+| `AIFPParticipationRegistry` | [lookup](https://sourcify.dev/#/lookup/0xA6242197F6DBD8A8CF8753742B7E0168EE617A83), [API](https://sourcify.dev/server/v2/contract/11155111/0xA6242197F6DBD8A8CF8753742B7E0168EE617A83) | 2026-11-17 13:16:11 |
+| `AIFPEventAnchor` | [lookup](https://sourcify.dev/#/lookup/0x74d5AdD218C3A33825AD3e450173960a1E4FAd5c), [API](https://sourcify.dev/server/v2/contract/11155111/0x74d5AdD218C3A33825AD3e450173960a1E4FAd5c) | 2026-11-17 13:16:07 |
+| `AIFPObjectionWindow` | [lookup](https://sourcify.dev/#/lookup/0x82382184983ABe091b2Af8f20006553DCeBB0981), [API](https://sourcify.dev/server/v2/contract/11155111/0x82382184983ABe091b2Af8f20006553DCeBB0981) | 2026-11-17 13:16:08 |
+| `AIFPSubjectSet` | [lookup](https://sourcify.dev/#/lookup/0xDE93b6b9245eF5ec352ADdFDbC1b1a2B702b755C), [API](https://sourcify.dev/server/v2/contract/11155111/0xDE93b6b9245eF5ec352ADdFDbC1b1a2B702b755C) | 2026-11-17 13:16:12 |
+
+   To resubmit from a machine with Foundry, one command per contract:
 
 ```
 forge verify-contract --chain sepolia --verifier sourcify 0x8bE1cF22C1f1ff6921652d84DF830a90b23C8633 assets/erc-aifp/contracts/AIFPParadigmRegistry.sol:AIFPParadigmRegistry
@@ -236,5 +278,4 @@ forge verify-contract --chain sepolia --verifier sourcify 0xDE93b6b9245eF5ec352A
    `deployments/11155111.cases.json` (for example `evaluate(bytes32,bytes32,uint16,bytes32,uint48)` on the
    participation registry at timepoints before and after `effectiveAt`).
 
-Sourcify match status: not yet submitted from the run environment (no route to sourcify.dev from it); the
-commands above reproduce the submission. The on-chain metadata hashes already match the repository build.
+The comparison in step 1 does not depend on a third-party service; Sourcify is the second, independent check.

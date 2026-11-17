@@ -70,12 +70,18 @@ case 8 old rule rejected and history unchanged, case 9 two disclosure records, c
 ## 4. Verify and record
 
 ```
+node tools/verify-deployment.mjs --rpc $RPC                                        # code, immutables, getters
 forge verify-contract --chain sepolia --verifier sourcify <address> <Contract>   # for each deployed contract
 ```
 
+The script compares the runtime code of every contract in `deployments/<chain>.json` with the local artifact
+byte for byte after zeroing the `immutableReferences` ranges on both sides, decodes the immutables baked into the
+code and reads their getters back, and checks `runtimeKeccak256`; comparing only the metadata hash at the tail
+would not cover the constructor arguments. Sourcify is the second, independent check.
+
 Commit `deployments/11155111*.json` and summarize the run in `docs/sepolia-evidence.md`: addresses, source
-version, runtime code hashes, transaction list with block numbers, and the Sourcify match status. The
-Magicians thread gets a short reply pointing to that file.
+version, runtime code hashes, transaction list with block numbers, the script's read-outs and the Sourcify match
+status. The Magicians thread gets a short reply pointing to that file.
 
 ## Run records
 

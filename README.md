@@ -90,7 +90,7 @@ assets/erc-aifp/examples/             11 named paradigms, 6 composites, 4 delibe
 assets/erc-aifp/vectors/              subject refs, predicate encodings, outcome tables, interface ids, paradigm ids
 test/                                 Foundry suite: unit tests + 12 boundary cases (self-contained, no submodules)
 script/                               Deploy.s.sol and Cases.s.sol (on-chain evidence, two phases)
-tools/                                descriptor validator, vector generator, filing-package script
+tools/                                descriptor validator, vector generator, filing-package script, deployment verifier
 docs/                                 design memo, boundary cases, Magicians post, Sepolia runbook, PR description
 deployments/                          evidence records written by the scripts
 ```
@@ -104,6 +104,7 @@ forge build
 forge test                                   # 229 tests, 27 suites; no `forge install` needed
 npm ci && npm run check                      # validates every example, rejects the invalid ones, regenerates vectors
 node tools/descriptor-validate.mjs assets/erc-aifp/examples/paradigms/panel.json --brief
+node tools/verify-deployment.mjs --rpc $RPC   # deployed code vs. build (immutables zeroed), getters, Sourcify-independent
 python3 tools/make-filing-package.py          # ercs-pr-package/ERCS/erc-8489.md + assets/erc-8489/, linted
 python3 tools/make-filing-package.py --number N --discussions-to URL   # only to override the number or thread
 ```
